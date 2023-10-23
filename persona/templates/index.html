@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="Clínica especializada em gastroenterologia, hepatologia, exames de imagem como endoscopia, colonoscopia, ecoendoscopia, tratamento por endocopia como CPRE, e exames funcionais como manometria, pHmetria, impedâncio-pHmetria, localizada em fortaleza, ceará, sob direção do dr miguel a n souza">
+
+    <meta name="keywords" content="gastroenterologia, endoscopia, colonoscopia, ecoendoscopia, CPRE, manometria, pHmetria, impedâncio-pHmetria, fortaleza, ceará, miguel a n souza, tarciso daniel, coopend, saúde, unimed, bradesco, amil, cassi, camed, geap, ipm, petrobrás">
+
+    <meta property="og:title" content="Manometria esofágica de alta resolução.">
+    <meta property="og:image" content="http://www.digest.com.br/static/catalog/manometria_m.gif">
+    <meta property="og:description" content="Qualidade e experiência na Digest, (85)3252-5469.">
+
+    <meta name="twitter:title" content="Manometria de alta resolução na Digest, Fortaleza, (85)3252-5469">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+
+    <title>Digest - Gastroenterologia</title>
+    <style>
+        body {
+            width: 100%;
+            max-width: 1200px;
+            margin: 2em auto;
+            font: .9em/1.2 Arial, Helvetica, sans-serif;
+            background-color: rgb(210,210,210);
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 5px 0.5fr 1fr 1fr 1fr 5px;
+            grid-gap: 15px;
+        }
+
+        .topnav {
+          grid-column: 2/6;
+          grid-row: 1;
+          overflow: hidden;
+          background-color: #333;
+        }
+
+        .topnav a {
+          float: left;
+          display: block;
+          color: #f2f2f2;
+          text-align: center;
+          padding: 14px 16px;
+          text-decoration: none;
+          font-size: 17px;
+        }
+
+        .topnav a:hover {
+          background-color: #ddd;
+          color: black;
+        }
+
+        .topnav a.active {
+          background-color: #4CAF50;
+          color: white;
+        }
+
+        .topnav .icon {
+          display: none;
+        }
+
+        @media screen and (max-width: 600px) {
+          .topnav a:not(:first-child) {display: none;}
+          .topnav a.icon {
+            float: right;
+            display: block;
+          }
+        }
+
+        @media screen and (max-width: 600px) {
+          .topnav.responsive {position: relative;}
+          .topnav.responsive .icon {
+            position: absolute;
+            right: 0;
+            top: 0;
+          }
+          .topnav.responsive a {
+            float: none;
+            display: block;
+            text-align: left;
+          }
+        }
+
+        footer {
+            padding: 10px;
+            background-color: rgb(207,232,220);
+         /*   border: 2px solid rgb(79,185,227);
+            border-radius: 5px;  */
+        }
+
+        aside {
+            border-right: 1px solid #999;
+            padding-right: 15px;
+            padding-left: 0px;
+            font: .9em/1.2 Arial, Helvetica, sans-serif;
+            /*min-width: 110px;
+            background-image: url("logo_circle.png");*/
+        }
+
+        header {
+            grid-column: 2/6;
+            grid-row: 2;
+            padding-right: 10px;
+         /*   border-radius: 5px;
+            border: 2px solid rgb(79,185,227);  */
+            font: 5em/3.9 Arial, Helvetica, sans-serif;/*3.9 adjusts the height*/
+            background-image: url("/static/gcanyon1.jpg");
+            background-repeat: no-repeat;
+        }
+
+        .htxt {
+            color: rgb(207,232,220);
+            text-align: right;
+        }
+
+        header:hover {
+            font-style: italic;
+        }
+
+        .htxt:hover {
+            color: rgb(49,81,108);
+        }
+
+      /*  h2 {
+            background-color: rgb(207,232,220);
+            text-align: center;
+            border-bottom: solid 1px;
+        }*/
+
+        h2:hover {
+            background-color: gold;
+        }
+
+
+        ul {
+            padding-left: 15px;
+        }
+
+        ul.article {
+            margin-left: 30px;
+        }
+
+        #pic1 {
+            grid-column: 3;
+            grid-row: 3;
+        }
+
+        #pic2 {
+            grid-column: 4;
+            grid-row: 3;
+        }
+
+        #pic3 {
+            grid-column: 5;
+            grid-row: 3;
+        }
+
+
+        #txt1 {
+          grid-column: 3;
+          grid-row: 4;
+        }
+
+        #txt2 {
+          grid-column: 4;
+          grid-row: 4;
+        }
+
+        #txt3 {
+          grid-column: 5;
+          grid-row: 4;
+        }
+
+        #contatos {
+            background-color: rgb(207,232,220);
+            text-align: center;
+        }
+
+        #servs {
+            text-align: center;
+            border-bottom: 1px solid #999;
+        }
+
+        #equipes {
+            text-align: center;
+            border-bottom: 1px solid #999;
+        }
+
+        #tema {
+            text-align: center;
+            border-bottom: 1px solid #999;
+        }
+
+        .tema {
+            font-size: .7em
+        }
+
+        .asideContatos {
+            padding-right: 20px;
+            position: relative;
+            grid-column: 2;
+            grid-row: 3;
+        }
+
+        /*Centraliza xy no container*/
+        #map {
+            margin: auto;
+        }
+
+        /* for the iframe to be responsive, have to put in a container */
+        .iframe-container {
+            overflow: hidden;
+            /*Calculated from the aspect ration of the content (in case of 16:9 it is 9/16= 0.5625)*/
+            padding-top: 16.25%;/*No need*/
+            padding-right: 20px;
+            padding-left: 0px;
+            grid-column: 2;
+            grid-row: 4;
+        }
+
+        .iframe-container iframe {
+           border: 0;
+           height: 100%;
+           left: 0;
+           position: absolute;
+           top: 0;
+           width: 80%;
+        }
+        .fb-like {
+            grid-row: 2;
+            grid-column: 5;
+            margin-top: 85%;
+            margin-left: 43%;
+        }
+
+        .center {
+            text-align: center;
+        }
+  /*      #logo {
+          grid-column: 1;
+          grid-row: 1;
+        }*/
+
+        /* Box styles */
+        .myBox {
+        border: none;
+        padding: 5px;
+        font: 12px/14px sans-serif;
+        color: rgb(109,110,106);
+        text-align: justify;
+        width: 98%;
+        height: 150px;
+        overflow: scroll;
+        }
+
+        /* Scrollbar styles */
+        ::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+        box-shadow: inset 0 0 10px olivedrab;
+        border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        background: yellowgreen;
+        box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+        background: #7bac10;
+        }
+
+        #mailto {
+          grid-column: 5;
+          grid-row: 5;
+        }
+
+        footer {
+          grid-column: 2 / 6;
+          grid-row: 5;
+          text-align: center;
+          font-size: 0.8em;
+        }
+
+    </style>
+
+        </head>
+
+        <body>
+
+            <dialog id="favDialog">
+                ???
+            </dialog>
+              <menu>
+            <button id="updateDetails">Update details</button>
+            </menu>
+
+            <script>
+                (function() {
+                  var updateButton = document.getElementById('updateDetails');
+                  var cancelButton = document.getElementById('cancel');
+                  var dialog = document.getElementById('favDialog');
+                  dialog.returnValue = 'favAnimal';
+
+                function openCheck(dialog) {
+                    if(dialog.open) {
+                      console.log('Dialog open');
+                    } else {
+                      console.log('Dialog closed');
+                    }
+                  }
+
+                  // Update button opens a modal dialog
+      updateButton.addEventListener('click', function() {
+        dialog.showModal();
+        openCheck(dialog);
+      });
+
+      // Form cancel button closes the dialog box
+      cancelButton.addEventListener('click', function() {
+        dialog.close('animalNotChosen');
+        openCheck(dialog);
+      });
+
+    })();
+            </script>
+
+
+            <div class="container">
+
+            <div id="fb-root">
+                <script async defer crossorigin="anonymous" src="https://connect.facebook.net/pt_BR/sdk.js#xfbml=1&version=v4.0"></script>
+            </div>
+
+            <div class="topnav" id="myTopnav">
+              <a href="index.html" class="active">Início</a>
+              <a href="modalEx.html">Exames</a>
+              <a href="temas.html">Temas</a>
+              <a href="#about">Sobre</a>
+              <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+                <i class="fa fa-bars"></i>
+              </a>
+            </div>
+
+                <header class="htxt">Digest</header>
+                <div class="fb-like" data-href="http://www.digest.com.br" data-width="80" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+
+                <!--<img id="logo" src="logo_circle.png">-->
+
+                <figure id="pic1" class="center">
+                <a target="_blank" href="LosAngeles.png">
+                <img id="pic1" src="/static/LosAngeles.png" width="200" height="180">
+                <figcaption class="center">Endoscopia: refluxo gastroesofágico</figcaption>
+                </a>
+                </figure>
+
+                <figure id="pic2" class="center">
+                <a target="_blank" href="manometria.jpg">
+                <img src="/static/manometria.jpg"
+                alt="A manometria esofágica de alta resolução padroniza melhor o vigor de contração (DCI), o relaxamento do esfincter inferior (IRP), a ocorrência de contrações simultâneas (DL)" width="200" height="180">
+                <figcaption class="center">Manometria esofágica de alta resolução</figcaption>
+                </a>
+                </figure>
+               <!--<img id="pic2" src="colangioCA_autoex2x.png" width="200" height="180"></img>-->
+                <figure id="pic3" class="center">
+                <a target="_blank" href="colangioCA_autoex2x.png">
+                <img id="pic3" src="/static/colangioCA_autoex2x.png" width="200" height="180">
+                <figcaption class="center">CPRE: Drenagem biliar com próteses autoexpansivas</figcaption>
+                </a>
+                </figure>
+
+                <iframe class="iframe-container" id="map" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3981.358882826357!2 d-38.51637775053424!3d-3.731715944218886!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x7c748599ea2ae71%3A0x1a3cef816d7fe704!2sR.%20Ant%C3%B4nio%20Augusto%2C%201270%20-%20Meireles%2C%20Fortaleza%20-%20CE%2C%2060110-370!5e0!3m2!1spt-BR!2sbr!4v1569816622096!5m2!1spt-BR!2sbr" width="110" height="110" frameborder="0" style="border:0;" allowfullscreen=""></iframe>
+
+                <article id="txt1">
+                        <h2 id="servs">Serviços:</h2>
+                        <ul class="article">
+                            <li>Gastroenterologia</li>
+                            <li>Endoscopia alta</li>
+                            <li>Colonoscopia</li>
+                            <li>Ecoendoscopia</li>
+                            <li>Colangiopancreatografia retrógrada endoscópica-CPRE</li>
+                            <li>Manometria esofágica e anorretal</li>
+                            <li>Impedâncio-pHmetria</li>
+                        </ul>
+                </article>
+                <article id="txt2">
+                        <h2 id="equipes">Equipe:</h2>
+                        <ul class="article">
+                            <li>Dr Daniel Viana</li>
+                            <li>Enf Jarana Mota</li>
+                            <li>Dra Larissa Elias</li>
+                            <li>
+                            <a href="mailto:miguel.sza@gmail.com">Dr Miguel A N Souza</a>
+                            </li>
+                            <li>Dra Samara Jacinto</li>
+                            <li>Dr Tarciso Daniel</li>
+                        </ul>
+                </article>
+                <article id="txt3">
+                        <h2 id="tema">Tema da semana: CPRE</h2>
+                        <a target="_blank" href="cpre.pdf">Texto completo</a>
+                        <div class="myBox">
+                        A CPRE é um procedimento cirúrgico por endoscopia. Logo distal ao estômago, o colédoco (canal da bile) desemboca no intestino delgado através de uma válvula chamada papila (esfíncter de Oddi). A bile produzida no fígado e acumulada na vesícula vai para o intestino através do colédoco. Ocorre que pedras (cálculos biliares) podem migrar da vesícula ou se formarem diretamente no colédoco (coledocolitíase). Neste caso, o paciente tem dor abdominal e pode ficar com os olhos e a pele amarelados (icterícia), assim como a urina. Pode ocorrer também febre e calafrios (colangite) ou inflamação do pâncreas (pancreatite). Esta situação exige tratamento cirúrgico e a via menos invasiva é a endoscópica. Pela CPRE, cortamos a papila (papilotomia), passamos acessórios para o interior do colédoco (cesta ou balão), e retiramos os cálculos.<hr style=color:#DDE0E3>
+                        Em outras situações, ocorre obstrução do colédoco por tumores, como o do pâncreas. Nestes casos, inicialmente não há dor e sim uma icterícia progressiva. Pela CPRE, pode-se desobstruir temporariamente o colédoco com próteses apropriadas.<hr style=color:#DDE0E3>
+                        Os exames de sangue importantes para o diagnóstico das obstruções do colédoco são principalmente as chamadas enzimas hepáticas (ALT, AST, gamaGT, fosfatase alcalina) e as bilirrubinas. O ultrassom abdominal frequentemente não mostra cálculos nem tumores obstruindo o colédoco, mas mostra uma dilatação deste, indicando que há de fato uma obstrução. A colangiorressonância magnética pode mostrar cálculos em torno de 5mm ou maiores. E a ecoendoscopia pode mostrar cálculos ou tumores menores ainda.
+                        </div>
+
+<!--
+                        <textarea name="tematext" style=width:99%;height:70%;color:rgb(109,110,106);border:none><p class="tema" style="padding-left: 10px">A CPRE é um procedimento cirúrgico por endoscopia. Logo distal ao estômago, o colédoco (canal da bile) desemboca no intestino delgado através de uma válvula chamada papila (esfíncter de Oddi). A bile produzida no fígado e acumulada na vesícula vai para o intestino através do colédoco. Ocorre que pedras (cálculos biliares) podem migrar da vesícula ou se formarem diretamente no colédoco (coledocolitíase). Neste caso, o paciente tem dor abdominal e pode ficar com os olhos e a pele amarelados (icterícia), assim como a urina. Pode ocorrer também febre e calafrios (colangite) ou inflamação do pâncreas (pancreatite). Esta situação exige tratamento cirúrgico e a via menos invasiva é a endoscópica. Pela CPRE, cortamos a papila (papilotomia), passamos acessórios para o interior do colédoco (cesta ou balão), e retiramos os cálculos.</p><hr>
+                        <p class="tema" style="padding-left: 10px">
+                        Em outras situações, ocorre obstrução do colédoco por tumores, como o do pâncreas. Nestes casos, inicialmente não há dor e sim uma icterícia progressiva. Pela CPRE, pode-se desobstruir temporariamente o colédoco com próteses apropriadas.</p><hr>
+                        <p class="tema" style="padding-left: 10px">
+                        Os exames de sangue importantes para o diagnóstico das obstruções do colédoco são principalmente as chamadas enzimas hepáticas (ALT, AST, gamaGT, fosfatase alcalina) e as bilirrubinas. O ultrassom abdominal frequentemente não mostra cálculos nem tumores obstruindo o colédoco, mas mostra uma dilatação deste, indicando que há de fato uma obstrução. A colangiorressonância magnética pode mostrar cálculos em torno de 5mm ou maiores. E a ecoendoscopia pode mostrar cálculos ou tumores menores ainda.
+                        </p>
+                        </textarea>
+-->
+                </article>
+
+                <aside class="asideContatos">
+                    <h2 id="contatos">Contatos:</h2>
+                        <ul>
+                            <p>Telefones (85):</p>
+                                <li>3252-5469</li>
+                                <li>3224-1547</li><br>
+                            <p>WhatsApp (85):</p>
+                                <li>99628-8800</li><br><br>
+                                <li><a href="mailto:contato@digest.com.br">Envie um e-mail</a></li>
+                        </ul>
+                </aside>
+
+<script>
+function myFunction() {
+  var x = document.getElementById("myTopnav");
+  if (x.className === "topnav") {
+    x.className += " responsive";
+  } else {
+    x.className = "topnav";
+  }
+}
+</script>
+
+                <footer>
+                    <address>Rua Antônio Augusto 1270, 1<sup>o</sup>andar, Fortaleza-CE, +55 85 3252-5469</address>
+                    <div><a id="mailto" href="mailto:contato@digest.com.br">Envie um e-mail</a></div>
+                </footer>
+            </div>
+
+        </body>
+
+</html>

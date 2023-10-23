@@ -1,0 +1,79 @@
+{% extends 'basepersona.html' %}
+{% load static %}
+
+
+{% block content %}
+
+<nav class="nav">
+    <div class="login-box animated fadeInUp">
+        <div class="box-header">
+            <div class="center">
+            <span class="title-adm">Digest</span>
+            <span class="title-adm">Telefone: (85) 3252-5469</span>
+                <div class="menu">
+                <ul class="nav nav-pills flex-column flex-sm-row">
+                  <li class="nav-item">
+                    <a class="nav-link active" href="client">Cliente</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="eventdetails">Detalhes</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link disabled" href="#">Disabled</a>
+                  </li>
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Dropdown</a>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item" href="agenda">Agenda</a>
+                      <a class="dropdown-item" href="#">Another action</a>
+                      <a class="dropdown-item" href="#">Something else here</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="#">Separated link</a>
+                    </div>
+                  </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</nav>
+<div class="container-fluid">
+<div class="row">
+        <div class="col-sm-4 col-sm-offset-2 col-md-4 col-md-offset-0" style="background-color:grey;">
+          <h3>Eventos Agendados</h3>
+                <t-body>
+                    {% if events %}
+                    <p>Número de evento(s): {{events.count}}</p>
+                    <ul id="li-front">
+
+                        {% for x in events %}
+                        <li>{{ x.id }} ({{ x.title}} >>> {{ x.start }})</li>
+                        {% endfor %}
+
+                      {% else %}
+                          <p>Sem eventos</p>
+                    {% endif %}
+                    </ul>
+                </t-body>
+        </div>
+          <div class="col-sm-4 col-sm-offset-2 col-md-4 col-md-offset-0" style="background-color:#0001;">
+            <h3>Pacientes Cadastados</h3>
+                  <t-body>
+                      {% if personas %}
+                      <p>Número de pacientes(s): {{personas.count}}</p>
+                      <ul id="li-front">
+
+                          {% for x in personas %}
+                          <li>{{ x.id }} ({{ x.name}} >>> {{ x.dob }})</li>
+                          {% endfor %}
+
+                        {% else %}
+                            <p>Sem pacientes</p>
+                      {% endif %}
+                      </ul>
+                  </t-body>
+          </div>
+        <div class="col-sm-4 col-sm-offset-2 col-md-4 col-md-offset-0">col</div>
+</div>
+</div>
+{% endblock %}

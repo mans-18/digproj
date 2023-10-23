@@ -1,0 +1,74 @@
+{% extends 'basepersona.html' %}
+{% load static %}
+{% load rest_framework %}
+
+
+{% block content %}
+
+<nav class="nav">
+    <div class="login-box animated fadeInUp">
+        <div class="box-header">
+            <div class="center">
+            <span class="title-adm">Digest</span>
+            <span class="title-adm">Telefone: (85) 3252-5469</span>
+                <div class="menu">
+                <ul class="nav nav-pills flex-column flex-sm-row">
+                  <li class="nav-item">
+                    <a class="nav-link active" href="client">Cliente</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="eventdetails">Detalhes</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link disabled" href="#">Disabled</a>
+                  </li>
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Dropdown</a>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item" href="agenda">Agenda</a>
+                      <a class="dropdown-item" href="#">Another action</a>
+                      <a class="dropdown-item" href="#">Something else here</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="#">Separated link</a>
+                    </div>
+                  </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</nav>
+
+    <!-- Do not send to EventList ('home'). Send to EventDetail along with a pk. However, there is no client instance here!!-->
+    <form action="{% url 'event-list' %}" method="POST">
+        {% csrf_token %}
+        <h3>Agendar Atendimento</h3>
+        {% render_form serializer %}
+        <<input type="submit" value="Save">
+    </form>
+        <hr>
+        <h3>Eventos Agendados</h3>
+        <div class="col-xs-6">
+            <div class="well" style="max-height: 150px;overflow: auto;">
+
+                <t-body>
+                    {% if events %}
+                    <p>Número de evento(s): {{events.count}}</p>
+                    <ul id="li-front">
+                      {% for x in events %}
+                      <li>{{ x.id }}: {{ x.persona }}, {{ x.title}}, {{ x.start }}</li>
+                      {% endfor %}
+                      {% else %}
+                          <p>Sem eventos</p>
+                      {% endif %}
+                    </ul>
+                </t-body>
+
+                <br>
+            </div>
+                <button type="button"  class="btn btn-danger" data-toggle="modal" data-target="#exampleModal" >Deletar</button>
+                <button type="button"  class="btn btn-warning" data-toggle="modal" data-target=".bd-example-modal-lg">Alterar</button>
+            <pre id="display-json"></pre>
+        </div>
+
+{% endblock %}

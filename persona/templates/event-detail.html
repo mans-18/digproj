@@ -1,0 +1,29 @@
+{% extends 'basepersona.html' %}
+{% load static %}
+{% load rest_framework %}
+
+
+{% block content %}
+
+
+<html>
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+</head>
+  <body>
+
+<h1>Exames: {{ event.title }}({{ event.id }})</h1>
+    <form action="{% url 'event-detail' pk=event.id %}" method="POST">
+        {% csrf_token %}
+        {% render_form serializer %}
+        <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+    </div>
+    </form>
+
+</body>
+</html>
+
+{% endblock %}

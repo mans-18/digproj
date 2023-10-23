@@ -1,0 +1,78 @@
+
+<h1>Digest</h1>
+<h2>Bom dia!</h2>
+
+<!--Caso selicionado apenas 1 médico para enviar email-->
+{% if toEmailCount < 2 %}
+
+{% if extra %}
+{% if event_data %}
+{% if persona_data %}
+{% if kollege_data %}
+<h2>Dr(a) {{extra}},</h2>
+
+<h2>Esta é sua agenda de amanhã conosco:</h2>
+<ul>
+    {% for kol in kollege_data %}
+        {% for ev in event_data %}
+            {% for item in persona_data %}
+                <p>
+                    {% if kol.id == ev.kollege_id %}
+                        {% if item.id == ev.persona_id %}
+                            {{item.name}}/{{kol.crm}}<br>
+                            {{ev.title}} ({{ev.start}})
+                        {% endif %}
+                    {% endif %}
+                </p>
+            {% endfor %}
+        {% endfor %}
+    {% endfor %}
+</ul>
+{% endif %}
+{% endif %}
+{% endif %}
+{% else %}
+    <p>Doutora(o), a(o) Sra(Sr) não terá exames amanhã na Digest.</p>
+    <h3>Aproveite o seu dia!!!</h3>
+{% endif %}
+
+<!--Caso selecionado múltiplos médicos para enviar email-->
+{% else %}
+
+{% if extra %}
+{% if event_data %}
+{% if persona_data %}
+{% if kollege_data %}
+<h2>Doutora (o),</h2>
+
+<h2>Esta é a agenda Digest de amanhã:</h2>
+<ul>
+    {% for kol in kollege_data %}
+        {% for ev in event_data %}
+            {% for item in persona_data %}
+                <p>
+                    {% if kol.id == ev.kollege_id %}
+                        {% if item.id == ev.persona_id %}
+                            {{item.name}}/{{kol.crm}}<br>
+                            {{ev.title}} ({{ev.start}})
+                        {% endif %}
+                    {% endif %}
+                </p>
+            {% endfor %}
+        {% endfor %}
+    {% endfor %}
+</ul>
+{% else %}
+    <p>Não haverá exames amanhã!</p>
+{% endif %}
+{% endif %}
+{% endif %}
+
+{% else %}
+    <p>Doutora(o), não haverá exames amanhã na Digest.</p>
+    <h3>Aproveite o seu dia!!!</h3>
+{% endif %}
+
+
+{% endif %}
+

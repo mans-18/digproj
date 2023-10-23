@@ -1,0 +1,398 @@
+{% extends 'basepersona.html' %}
+{% load static %}
+{% load rest_framework %}
+
+
+{% block content %}
+
+<nav class="nav">
+    <div class="login-box animated fadeInUp">
+        <div class="box-header">
+            <div class="center">
+            <span class="title-adm">Digest</span>
+            <span class="title-adm">Telefone: (85) 3252-5469</span>
+                <div class="menu">
+                <ul class="nav nav-pills flex-column flex-sm-row">
+                  <li class="nav-item">
+                    <a class="nav-link active" href="client">Cliente</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="eventdetails">Detalhes</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link disabled" href="#">Disabled</a>
+                  </li>
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Dropdown</a>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item" href="agenda">Agenda</a>
+                      <a class="dropdown-item" href="#">Another action</a>
+                      <a class="dropdown-item" href="#">Something else here</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="#">Separated link</a>
+                    </div>
+                  </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</nav>
+<div class="container">
+  <div id='wrap'>
+    <div id='external-events'>
+
+    <!-- Do not send to EventList ('home'). Send to EventDetail along with a pk. However, there is no client instance here!!-->
+    <form action="{% url 'event-list' %}" method="post">
+        {% csrf_token %}
+        <h3>Agendar Atendimento</h3>
+        <div class="form-row field-persona">
+          <div>
+            <label>Usuário</label>
+            <select type="email" id="email" name="email" class="related-widget-wrapper-link change-related" class="form-control">
+                <option value="">Selecione</option>
+                <option>mans@ufc.br</option>
+                <option>miguel.sza@gmail.com</option>
+                <option></option>
+            </select>
+          </div>
+          <div>
+            <label>Nome do Usuário</label>
+            <select type="name" id="name" name="name" class="related-widget-wrapper-link change-related" class="form-control">
+                <option value="">Selecione</option>
+                <option>Miguel</option>
+                <option>Tarciso</option>
+                <option></option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row field-persona">
+          <div>
+            <label class="required" for="persona">Paciente:</label>
+              <div class="related-widget-wrapper">
+
+                {% if personas %}
+                <select name="persona" required id="persona">
+                <option value="">Selecione</option>
+                {% for x in personas %}
+                <option value="">{{ x.name }}</option>
+                {% endfor %}
+                {% else %}
+                {% endif %}
+                </select>
+                <a class="related-widget-wrapper-link change-related" id="change_id_persona"
+                    data-href-template="/admin/core/persona/__fk__/change/?_to_field=id&amp;_popup=1"
+                    title="Alterar persona selecionado"><img src="/static/admin/img/icon-changelink.svg" alt="Modificar"></a><a class="related-widget-wrapper-link add-related" id="add_id_persona"
+                    href="/admin/core/persona/add/?_to_field=id&amp;_popup=1"
+                    title="Adicionar outro persona"><img src="/static/admin/img/icon-addlink.svg" alt="Adicionar"></a>
+
+              </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="required" for="kollege">Médico:</label>
+            <div class="related-widget-wrapper">
+
+              {% if kollegen %}
+              <select name="kollege" required id="kollege">
+              <option value="">Selecione</option>
+              {% for x in kollegen %}
+              <option value="">{{ x.name }}</option>
+              {% endfor %}
+              {% else %}
+              {% endif %}
+              </select>
+              <a class="related-widget-wrapper-link change-related" id="change_id_persona"
+                  data-href-template="/admin/core/persona/__fk__/change/?_to_field=id&amp;_popup=1"
+                  title="Alterar persona selecionado"><img src="/static/admin/img/icon-changelink.svg" alt="Modificar"></a><a class="related-widget-wrapper-link add-related" id="add_id_persona"
+                  href="/admin/core/persona/add/?_to_field=id&amp;_popup=1"
+                  title="Adicionar outro persona"><img src="/static/admin/img/icon-addlink.svg" alt="Adicionar"></a>
+
+            </div>
+        </div>
+        <br>
+
+        <label>Procedimento</label>
+        <select type="text" id="title" name="title" class="form-control">
+            <option value="">Selecione</option>
+            <option style="color:#40E0D0;">EDA</option>      Turquesa
+            <option style="color:#FFD700;">Colonoscopia</option>      Amarelo
+            <option style="color:#436EEE;">pHmetria</option>   Royal Blue
+            <option style="color:#A020F0;">Manometria Esofágica</option>          Roxo
+            <option style="color:#228B22;">Manometria Anorretal</option>         Verde
+            <option style="color:#8B0000;">CPRE</option>      Vermelho
+            <option style="color:#FF4500;">Consulta</option>          Laranja
+            <option style="color:#0071c5;"></option>
+            <option style="color:#8B4513;"></option>
+            <option style="color:#1C1C1C;"></option>
+        </select>
+
+        <label>Data/Hora</label>
+        <input type="datetime-local" class="form-control" id="start" name="start" step="900">
+
+        <label>Convênio</label>
+        <select type="text" id="title" name="title" class="form-control">
+            <option value="">Selecione</option>
+            <option>Unimed</option>
+            <option>Hapvida</option>
+            <option>Amil</option>
+            <option>Issec</option>
+            <option>IPM</option>
+            <option>Camed</option>
+            <option>Cassi</option>
+            <option>Funcef</option>
+            <option>Bradesco</option>
+            <option>Fusex</option>
+            <option>Fusma</option>
+            <option>Petrobrás Asfor</option>
+            <option>Petrobrás Disfor</option>
+            <option></option>
+        </select>
+
+        <label>Comentários</label>
+        <input type="text" class="form-control" id="comment" name="comment"><br>
+
+        <button class="btn btn-success" type="submit">Gravar</button>
+
+        {% if messages %}
+        <span class="messages">
+        {% for message in messages %}
+            <span{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</span>
+        {% endfor %}
+        <span/>
+        {% endif %}
+    </form>
+        <hr>
+        <h3>Eventos Agendados</h3>
+        <div class="col-xs-6">
+            <div class="well" style="max-height: 150px;overflow: auto;">
+
+                <t-body>
+                    {% if events %}
+                    <p>Número de evento(s): {{events.count}}</p>
+                    <ul id="li-front">
+                      {% for x in events %}
+                      <li>{{ x.id }}: {{ x.persona }}, {{ x.title}}, {{ x.start }}</li>
+                      {% endfor %}
+                      {% else %}
+                          <p>Sem eventos</p>
+                      {% endif %}
+                    </ul>
+                </t-body>
+
+                <br>
+            </div>
+                <button type="button"  class="btn btn-danger" data-toggle="modal" data-target="#exampleModal" >Deletar</button>
+                <button type="button"  class="btn btn-warning" data-toggle="modal" data-target=".bd-example-modal-lg">Alterar</button>
+            <pre id="display-json"></pre>
+        </div>
+
+  </div>
+
+    <div id='calendar'></div>
+
+    <div style='clear:both'></div>
+
+</div>
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Aviso</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Deseja deletar a consulta selecionada?
+      </div>
+      <div class="modal-footer">
+        <button type="button" onclick="del_event()" class="btn btn-success" >SIM</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal">NÂO</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade bd-example-modal-lg" id="alterarModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-body">
+        <form>
+        <label>Data&emsp;/&emsp; Hora</label>
+        <br/>
+        <input type="date" name="data_alterar" required>
+        <input type="time" name="time_alterar" min="4:00" max="23:00" required />
+        <br/>
+        <label>Comentario</label>
+        <br/>
+        <input type="text" class="form-control" name="comentario_alterar">
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+        <button type="button" onclick="change_event()" class="btn btn-primary">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- From cal   VISUALIZAR/enventClick-->
+ <div class="modal fade" id="visualizar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Detalhes do Evento</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="formedit">
+                            <span id="msg-edit"></span>
+
+                            <form action="" id="formedit" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {% if list_events_all %}
+                                    <ul id="li-front">
+                                        {% for event in list_events_all %}
+                                            <input type="radio" name="del-event" id="event{{ forloop.counter}}" value="{{event.code}}"></br>
+                                            <label for="event{{ forloop.counter}}">{{event.title}}, {{event.start}}, {{event.code}}, {{event.userCode}}</lable></br>
+                                            <br>
+                                        {% endfor %}
+                                    </ul>
+                                    {% else %}
+                                        <p>Sem eventos</p>
+                                {% endif %}
+
+                                <input type="hidden" name="id" id="id">
+
+                                <button class="btn btn-success" type="submit">Gravar</button>
+                            </form>
+
+
+                            <!-- Delete will function if the del button is inside a form. no need for all the rows, only id-->
+                            <span id="msg-del"></span>
+                            <form id="delevent" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" id="id">
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="cadastrar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Cadastrar Evento</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <span id="msg-cad"></span>
+                        <form id="addevent" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div style="background:#FFD700"><br>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Paciente</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="paciente" class="form-control" id="paciente" placeholder="Nome completo do paciente">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Médico</label>
+                                <div class="col-sm-10">
+                                    <select name="medico" class="form-control" id="medico">
+                                        <option value="">Selecione</option>
+                                        <option style="color:#FFD700;" value="#FFD700">Amarelo</option>
+                                        <option style="color:#0071c5;" value="#0071c5">Azul Turquesa</option>
+                                        <option style="color:#FF4500;" value="#FF4500">Laranja</option>
+                                        <option style="color:#8B4513;" value="#8B4513">Marrom</option>
+                                        <option style="color:#1C1C1C;" value="#1C1C1C">Preto</option>
+                                        <option style="color:#436EEE;" value="#436EEE">Royal Blue</option>
+                                        <option style="color:#A020F0;" value="#A020F0">Roxo</option>
+                                        <option style="color:#40E0D0;" value="#40E0D0">Turquesa</option>
+                                        <option style="color:#228B22;" value="#228B22">Verde</option>
+                                        <option style="color:#8B0000;" value="#8B0000">Vermelho</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Início do evento</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="start" class="form-control" id="start" onkeypress="DataHora(event, this)">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Final do evento</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="end" class="form-control" id="end"  onkeypress="DataHora(event, this)">
+                                </div>
+                            </div>
+                        </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Celular</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="celular" class="form-control" id="celular" placeholder="ddd e número do telefone sem espaços e sem traços">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">WhatsApp</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="whatsapp" class="form-control" id="whatsapp" placeholder="ddd e número do telefone sem espaços e sem traços">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Telefone fixo</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="fixo" class="form-control" id="fixo" placeholder="ddd e número do telefone sem espaços e sem traços">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">e-mail</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="email" class="form-control" id="email" placeholder="nome@xxx.yy">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Solicitante</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="solicitante" class="form-control" id="solicitante" placeholder="Médico solicitante">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Procedimento</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="procedimento" class="form-control" id="procedimento" placeholder="Procedimento a realizar">
+                                </div>
+                            </div>
+                            <div style="background:#FFD700"><br></div><br>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Comentários</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="comentarios" class="form-control" id="comentarios" placeholder="Informações extras">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-10">
+                                    <button type="button" onclick="location.reload()" class="btn btn-primary btn-canc-edit">Cancelar</button>
+                                    <button type="submit" name="CadEvent" id="CadEvent" value="CadEvent" class="btn btn-success">Cadastrar</button>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+{% endblock %}

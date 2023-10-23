@@ -1,0 +1,48 @@
+{% extends 'basepersona.html' %}
+{% load static %}
+{% load rest_framework %}
+
+{% block content %}
+
+<nav class="nav">
+    <div class="login-box animated fadeInUp">
+        <div class="box-header">
+            <div class="center">
+            <span class="title-adm">Digest</span>
+            <span class="title-adm">Telefone: (85) 3252-5469</span>
+                <div class="menu">
+                <ul class="nav nav-pills flex-column flex-sm-row">
+                  <li class="nav-item">
+                    <a class="nav-link active" href="client">Cliente</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="eventdetails">Detalhes</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link disabled" href="#">Disabled</a>
+                  </li>
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Dropdown</a>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item" href="agenda">Agenda</a>
+                      <a class="dropdown-item" href="#">Another action</a>
+                      <a class="dropdown-item" href="#">Something else here</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="#">Separated link</a>
+                    </div>
+                  </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</nav>
+<div class="container-fluid">
+<h1>Erro!!!</h1>
+<form action="{% url 'event-list' %}" method="POST">
+{% csrf_token %}
+{% render_form serializer %}
+<input type="submit" value="Save">
+</form>
+</div>
+{% endblock %}

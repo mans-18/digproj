@@ -1,0 +1,19 @@
+
+{% if name %}
+{% if mobile %}
+{% if email %}
+{% if body %}
+
+<h2>Esta mensagem foi enviada através do site da Digest</h2>
+<br>
+<ul>
+    <p>Nome: {{name}}</p>
+    <p>Celular: {{mobile|default:"em branco"}}</p>
+    <p>e-Mail: {{email}}</p>
+    <p>Mensagem: {{body}}</p>
+</ul>
+
+{% endif %}
+{% endif %}
+{% endif %}
+{% endif %}

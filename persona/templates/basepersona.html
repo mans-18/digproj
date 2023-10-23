@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Digest API{% endblock %}</title>
+
+  <link rel="stylesheet" href="{% static 'packages/core/main.css' %}"/>
+  <link rel="stylesheet" href="{% static 'packages/daygrid/main.css' %}"/>
+  <link rel="stylesheet" href="{% static 'packages/timegrid/main.css' %}"/>
+  <link rel="stylesheet" href="{% static 'packages/list/main.css' %}"/>
+  <script src="{% static 'packages/core/main.js' %}"></script>
+  <script src="{% static 'packages/interaction/main.js' %}"></script>
+  <script src="{% static 'packages/daygrid/main.js' %}"></script>
+  <script src="{% static 'packages/timegrid/main.js' %}"></script>
+  <script src="{% static 'packages/list/main.js' %}"></script>
+  <script src="{% static 'packages/core/locales/pt-br.js' %}"></script>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.js"></script>
+
+  <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700|Lato:400,100,300,700,900' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style-adm.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/agenda.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/stylex.css' %}">
+
+  <script src="{% static 'js/calendario.js' %}"></script>
+  <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+
+</head>
+<body>
+
+  <div id=sidebar>
+    {% block sidebar %}
+      <ul>
+        <li><a href="/api/persona/inicio/">Início</a></li>
+        <li><a href="/api/persona/events/">Calendário</a></li>
+      </ul>
+    {% endblock %}
+  </div>
+
+  <div id=content>
+    {% block content %}
+
+    {% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+
+<html lang="pt-br" >
+<head>
+<title>Adicionar evento | Digest</title>
+<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css">
+<link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css">
+
+<script type="text/javascript" src="/admin/jsi18n/"></script>
+<script type="text/javascript" src="/static/admin/js/vendor/jquery/jquery.js"></script>
+<script type="text/javascript" src="/static/admin/js/calendar.js"></script>
+<script type="text/javascript" src="/static/admin/js/jquery.init.js"></script>
+<script type="text/javascript" src="/static/admin/js/admin/DateTimeShortcuts.js"></script>
+<script type="text/javascript" src="/static/admin/js/core.js"></script>
+<script type="text/javascript" src="/static/admin/js/admin/RelatedObjectLookups.js"></script>
+<script type="text/javascript" src="/static/admin/js/actions.js"></script>
+<script type="text/javascript" src="/static/admin/js/urlify.js"></script>
+<script type="text/javascript" src="/static/admin/js/prepopulate.js"></script>
+<script type="text/javascript" src="/static/admin/js/vendor/xregexp/xregexp.js"></script>
+
+<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<link rel="stylesheet" type="text/css" href="/static/admin/css/responsive.css">
+
+<meta name="robots" content="NONE,NOARCHIVE">
+</head>
+
+<body class=" app-core model-event change-form"
+  data-admin-utc-offset="-10800">
+<!-- Container -->
+<div id="container">
+    <!-- Header -->
+    <div id="header">
+        <div id="branding">
+          <h1 id="site-name"><a href="/admin/">Administração da Digest</a></h1>
+          </div>
+          <div id="user-tools">
+                Bem-vindo(a),
+                <strong>mans@ufc.br</strong>.
+                    <a href="/">Ver o site</a> /
+                    <a href="/admin/password_change/">Alterar senha</a> /
+                    <a href="/admin/logout/">Encerrar sessão</a>
+          </div>
+    </div>
+    <!-- END Header -->
+<div class="breadcrumbs">
+<a href="/admin/">Início</a>
+&rsaquo; <a href="/admin/core/">Core</a>
+&rsaquo; <a href="/admin/core/event/">Events</a>
+&rsaquo; Adicionar evento
+</div>
+    <!-- Content -->
+    <div id="content" class="colM">
+        <h1>Adicionar evento</h1>
+        <div id="content-main">
+<form action="" method="post" id="event_form" novalidate><input type="hidden" name="csrfmiddlewaretoken" value="IhkCSizovxyPc2W6viqphBtLuaGmwMHMrfQRy385MgLicNJtKi5mVza69SCv07Dg">
+<div>
+  <fieldset class="module aligned ">
+        <div class="form-row field-user">
+                <div>
+                        <label class="required" for="id_user">User:</label>
+                            <div class="related-widget-wrapper">
+                              <select name="user" required id="id_user">
+                                <option value="" selected>---------</option>
+                                <option value="1">mans@ufc.br</option>
+                                <option value="2">miguel.sza@gmail.com</option>
+                              </select>
+                            <a class="related-widget-wrapper-link change-related" id="change_id_user"
+                                data-href-template="/admin/core/user/__fk__/change/?_to_field=id&amp;_popup=1"
+                                title="Alterar user selecionado"><img src="/static/admin/img/icon-changelink.svg" alt="Modificar"></a><a class="related-widget-wrapper-link add-related" id="add_id_user"
+                                href="/admin/core/user/add/?_to_field=id&amp;_popup=1"
+                                title="Adicionar outro user"><img src="/static/admin/img/icon-addlink.svg" alt="Adicionar"></a>
+                            </div>
+                </div>
+        </div>
+        <div class="form-row field-title">
+                <div>
+                        <label class="required" for="id_title">Title:</label>
+                            <input type="text" name="title" class="vTextField" maxlength="100" required id="id_title">
+                </div>
+        </div>
+        <div class="form-row field-start">
+
+                <div>
+                        <label class="required" for="id_start_0">Start:</label>
+                            <p class="datetime">
+                              Data: <input type="text" name="start_0" class="vDateField" size="10" required id="id_start_0">
+                              <br>
+                              Hora: <input type="text" name="start_1" class="vTimeField" size="8" required id="id_start_1">
+                            </p>
+                </div>
+        </div>
+        <div class="form-row field-color">
+                <div>
+                        <label for="id_color">Color:</label>
+                            <input type="text" name="color" class="vTextField" maxlength="20" id="id_color">
+                </div>
+        </div>
+        <div class="form-row field-insurance">
+                <div>
+                        <label for="id_insurance">Insurance:</label>
+                            <input type="text" name="insurance" class="vTextField" maxlength="100" id="id_insurance">
+                </div>
+        </div>
+        <div class="form-row field-comment">
+                <div>
+                        <label for="id_comment">Comment:</label>
+                            <input type="text" name="comment" class="vTextField" maxlength="255" id="id_comment">
+                </div>
+        </div>
+        <div class="form-row field-persona">
+                <div>
+                        <label class="required" for="id_persona">Persona:</label>
+                            <div class="related-widget-wrapper">
+                              <select name="persona" required id="id_persona">
+                                <option value="" selected>---------</option>
+                                <option value="1">Joao</option>
+                                <option value="2">Maria</option>
+                              </select>
+                              <a class="related-widget-wrapper-link change-related" id="change_id_persona"
+                                  data-href-template="/admin/core/persona/__fk__/change/?_to_field=id&amp;_popup=1"
+                                  title="Alterar persona selecionado"><img src="/static/admin/img/icon-changelink.svg" alt="Modificar"></a><a class="related-widget-wrapper-link add-related" id="add_id_persona"
+                                  href="/admin/core/persona/add/?_to_field=id&amp;_popup=1"
+                                  title="Adicionar outro persona"><img src="/static/admin/img/icon-addlink.svg" alt="Adicionar"></a>
+
+                            </div>
+                </div>
+        </div>
+        <div class="form-row field-kollege">
+                <div>
+                        <label class="required" for="id_kollege">Kollege:</label>
+                            <div class="related-widget-wrapper">
+                              <select name="kollege" required id="id_kollege">
+                                <option value="" selected>---------</option>
+                                <option value="1">Miguel</option>
+                                <option value="2">Tarciso Daniel Rocha</option>
+                              </select>
+        <a class="related-widget-wrapper-link change-related" id="change_id_kollege"
+            data-href-template="/admin/core/kollege/__fk__/change/?_to_field=id&amp;_popup=1"
+            title="Alterar kollege selecionado"><img src="/static/admin/img/icon-changelink.svg" alt="Modificar"></a><a class="related-widget-wrapper-link add-related" id="add_id_kollege"
+            href="/admin/core/kollege/add/?_to_field=id&amp;_popup=1"
+            title="Adicionar outro kollege"><img src="/static/admin/img/icon-addlink.svg" alt="Adicionar"></a>
+</div>
+                </div>
+        </div>
+</fieldset>
+<div class="submit-row">
+<input type="submit" value="Salvar" class="default" name="_save">
+<input type="submit" value="Salvar e adicionar outro(a)" name="_addanother">
+<input type="submit" value="Salvar e continuar editando" name="_continue">
+</div>
+    <script type="text/javascript"
+            id="django-admin-form-add-constants"
+            src="/static/admin/js/change_form.js"
+                data-model-name="event">
+    </script>
+<script type="text/javascript"
+        id="django-admin-prepopulated-fields-constants"
+        src="/static/admin/js/prepopulate_init.js"
+        data-prepopulated-fields="[]">
+</script>
+</div>
+</form></div>
+        <br class="clear">
+    </div>
+    <!-- END Content -->
+    <div id="footer"></div>
+</div>
+<!-- END Container -->
+</body>
+</html>

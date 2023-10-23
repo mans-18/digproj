@@ -1,0 +1,21 @@
+{% load static %}
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8">
+    <title>Agendamento OK</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.css">
+</head>
+	<body>
+
+		<div class="alert alert-success" role="alert">
+			<span class="alert alert-success">Cadastro realizado!
+            <br><br><br>
+			<a href="home" class="alert-link">Clique aqui para voltar para a Agenda</a>
+            <br><br><br>
+            <a href="{{ event.get_absolute_url }}"> Ou clique aqui para ver detalhes do evento</a>
+			</span>
+		</div>
+
+	</body>
+</html>

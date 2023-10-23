@@ -23,7 +23,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 ALLOWED_HOSTS = [
     '44.198.138.125',
     'digest.com.br',
-    'localhost',
+    #'localhost',
 ]
 
 DEBUG = True #config('DEBUG', default=False, cast=bool)

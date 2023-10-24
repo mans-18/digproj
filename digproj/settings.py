@@ -23,7 +23,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 ALLOWED_HOSTS = [
     '44.198.138.125',
     'digest.com.br',
-    #'localhost',
+    'localhost',
 ]
 
 DEBUG = True #config('DEBUG', default=False, cast=bool)
@@ -93,7 +93,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'dig',
         'USER': 'admin',
-        'PASSWORD': os.environ.get('DIG_PSW'),
+        'PASSWORD': 'tsegid', #os.environ.get('DIG_PSW'),
         'HOST': 'localhost',
         'PORT': ''
     } 

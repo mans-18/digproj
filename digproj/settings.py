@@ -149,6 +149,9 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # Compress static files for serving
 # https://warehouse.python.org/project/whitenoise
 STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },

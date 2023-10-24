@@ -148,4 +148,8 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Compress static files for serving
 # https://warehouse.python.org/project/whitenoise
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}

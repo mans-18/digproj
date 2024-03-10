@@ -116,7 +116,7 @@ class Event(models.Model):
                                 related_name='events-persona+')
     kollege = models.ForeignKey('Kollege',
                                  on_delete=models.CASCADE)
-    
+    # This onr to one permits multiple eventReports per event
     #eventReport = models.OneToOneField('EventReport', on_delete=models.CASCADE)
     #eventreport = models.ForeignKey('EventReport',
      #                               on_delete=models.CASCADE)
@@ -149,6 +149,7 @@ class EventReport(models.Model):
         time = strftime('%Y/%m/%d/')
         picurl =  time + arg2 + '/' + arg1
         return picurl
+    
     # Images (10)
     # https://www.geeksforgeeks.org/imagefield-django-models/
     #im1 = models.ImageField(upload_to ='uploads/% Y/% m/% d/')
@@ -164,18 +165,20 @@ class EventReport(models.Model):
     im10 = models.ImageField(upload_to = event_directory_path, null=True, blank=True)'''
 
     #im1 = models.ImageField(upload_to = pictime, blank=True)
-    im1 =  models.TextField(blank=True)
-    im2 = models.TextField(blank=True)
-    im3 = models.TextField(blank=True)
-    im4 = models.TextField(blank=True)
-    im5 = models.TextField(blank=True)
-    im6 = models.TextField(blank=True)
-    im7 = models.TextField(blank=True)
-    im8 = models.TextField(blank=True)
-    im9 = models.TextField(blank=True)
-    im10 = models.TextField(blank=True)
+    #id = models.IntegerField(null=False, blank=False)
+    im1 =  models.TextField(null=True, blank=True)
+    im2 = models.TextField(null=True, blank=True)
+    im3 = models.TextField(null=True, blank=True)
+    im4 = models.TextField(null=True, blank=True)
+    im5 = models.TextField(null=True, blank=True)
+    im6 = models.TextField(null=True, blank=True)
+    im7 = models.TextField(null=True, blank=True)
+    im8 = models.TextField(null=True, blank=True)
+    im9 = models.TextField(null=True, blank=True)
+    im10 = models.TextField(null=True, blank=True)
 
     # Laudos (23)
+    #id = models.IntegerField(null=False, blank=False)
     drugs = models.CharField(null=True, max_length=255, blank=True)
     anest = models.CharField(null=True, max_length=255, blank=True)
     assistant = models.CharField(null=True, max_length=255, blank=True)
@@ -198,14 +201,20 @@ class EventReport(models.Model):
     conc5 = models.CharField(null=True, max_length=255, blank=True)
     conc6 = models.CharField(null=True, max_length=255, blank=True)
     complications = models.CharField(null=True, max_length=255, blank=True)
+    #event = models.OneToOneField('Event', on_delete=models.CASCADE,)
+    #500 Error: no field 'id' in eventreport. Or, integrity error, occurred cause Django created an auto id as primary key.
+    #The primary key must be the event.
+    #Ex at https://docs.djangoproject.com/en/5.0/topics/db/examples/one_to_one/ has a primary_key !!!
     event = models.ForeignKey('Event', on_delete=models.CASCADE)
+
+    #event = models.ForeignKey('Event', on_delete=models.CASCADE)
 
     # Cause of this, conc1 is required. If not, gets error: __str__ not a string
     def __str__(self):
-        return self.conc1
+        return str(self.conc1)+" "+str(self.conc2)
 
     class Meta:
-        ordering = ['assistant',]
+        ordering = ['id', 'assistant',]
 
 
 class Persona(models.Model):

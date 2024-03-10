@@ -35,7 +35,8 @@ class EventReportSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EventReport
-        fields = ('id', #'reportUUID',
+        fields = (#'reportUUID',
+                'id',
                 'im1', 'im2', 'im3', 'im4', 'im5', 'im6', 'im7', 'im8', 'im9', 'im10',
                 'drugs', 'anest', 'assistant', 'equipment', 'phar', 'esop', 'stom', 'duod',
                 'urease', 'biopsy', 'hystoResults', 'prep', 'quality', 'colo', 'genericDescription',

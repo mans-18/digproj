@@ -24,11 +24,17 @@ ALLOWED_HOSTS = [
     '44.198.138.125',
     'digest.com.br',
     'localhost',
+    '127.0.0.1',
 ]
 
-DEBUG = True #config('DEBUG', default=False, cast=bool)
-
-SECRET_KEY = 'h%$7j91w!qrkc=ve+0g#^vz)x=n-9@-b70fs@6a*fb$m9^4mxx' #os.environ.get('SECRET_KEY')
+#evironment vars done (DEBUG, SECRET_KEY, DB, EMAIL) with decouple.config
+#stored at .env (must go to .gitignore)
+#DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
+SECRET_KEY = config('SECRET_KEY')
+# With str() it does!!! But not for the email below
+#SECRET_KEY = str(os.environ.get('SECRET_KEY'))
+#SECRET_KEY =  'h%$7j91w!qrkc=ve+0g#^vz)x=n-9@-b70fs@6a*fb$m9^4mxx'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -81,13 +87,56 @@ DEFAULT_AUTO_FIELD='django.db.models.AutoField'
 WSGI_APPLICATION = 'digproj.wsgi.application'
 
 ### Required to deploy
-default_dburl = 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
+#default_dburl = 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
+
+# path tosqlite3
+# /Users/miguel/Dev/dig/dig_back
 
 ### This DB used locally in dev
 #DATABASES = {'default': config('DATABASE_URL', default=default_dburl, cast=dburl)}
 
 #DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
 
+'''
+DATABASE_DIR = os.path.join(BASE_DIR, 'db.sqlite3')
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': DATABASE_DIR,
+    }
+}
+'''
+'''
+Cheaper than aws rds
+pip install django-s3-sqlite
+'''
+'''
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'dig',
+     #   'USER': 'miguel',
+     #   'PASSWORD': os.environ.get('DIG_PSW'),
+     #   'HOST': 'localhost',
+        'PORT': ''
+    } 
+}
+'''
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DATABASE_URL').split('/')[-1],
+        'USER': config('DATABASE_URL').split('//')[1].split(':')[0],
+        'PASSWORD': config('DATABASE_URL').split(':')[2].split('@')[0],
+        'HOST': config('DATABASE_URL').split('@')[1].split(':')[0],
+        'PORT': config('DATABASE_URL').split(':')[-1].split('/')[0],
+    }
+}
+
+
+
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -98,6 +147,7 @@ DATABASES = {
         'PORT': ''
     } 
 }
+'''
 
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -128,7 +178,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = False #True
+USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
@@ -139,7 +189,9 @@ EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 #EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_PASSWORD = 'xiaqpmtvbyydtvug' #os.environ.get('EMAIL_HOST_PASSWORD_DIGPROJ')
+#EMAIL_HOST_PASSWORD = 'xiaqpmtvbyydtvug'
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+#EMAIL_HOST_PASSWORD = str(os.environ.get('EMAIL_HOST_PASSWORD_DIGPROJ'))
 
 EMAIL_HOST_USER = 'miguel.sza@gmail.com'
 EMAIL_PORT = 587

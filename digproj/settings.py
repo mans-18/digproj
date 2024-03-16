@@ -20,7 +20,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 ALLOWED_HOSTS = [
-    '44.198.138.125',
+    '54.174.42.144',
     'digest.com.br',
     'localhost',
     '127.0.0.1',

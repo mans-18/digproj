@@ -20,6 +20,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 ALLOWED_HOSTS = [
+    '54.175.161.178', #AWS digproj 19-3-24
     '54.174.42.144',
     'digest.com.br',
     'localhost',

@@ -1,4 +1,4 @@
-altgraph @ file:///AppleInternal/Library/BuildRoots/9dd5efe2-7fad-11ee-b588-aa530c46a9ea/Library/Caches/com.apple.xbs/Sources/python3/altgraph-0.17.2-py2.py3-none-any.whl
+#altgraph @ file:///AppleInternal/Library/BuildRoots/9dd5efe2-7fad-11ee-b588-aa530c46a9ea/Library/Caches/com.apple.xbs/Sources/python3/altgraph-0.17.2-py2.py3-none-any.whl
 anyio==4.0.0
 appnope==0.1.3
 argon2-cffi==23.1.0

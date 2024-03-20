@@ -1,1 +1,0 @@
-1. In settings.py: commented TIME_ZONE and uncommented USE_TZ

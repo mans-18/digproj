@@ -20,6 +20,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 ALLOWED_HOSTS = [
+    '44.198.138.125', #AWS Elastic IP 22-3-24
+    '34.201.127.247', #AWS digproj 21-3-24
+    '44.202.142.53', #AWS digproj 20-3-24
     '54.175.161.178', #AWS digproj 19-3-24
     '54.174.42.144',
     'digest.com.br',
@@ -123,7 +126,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")

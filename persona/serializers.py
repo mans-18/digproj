@@ -1,7 +1,14 @@
 # pylint: disable=import-error
 from rest_framework import serializers
-from core.models import Kollege, Event, Persona, EventReport, Partner, GenericGroup, EmailFromSite
+from core.models import User, Kollege, Event, Persona, EventReport, Partner, GenericGroup, EmailFromSite
 
+class UserSerializer(serializers.ModelSerializer):
+    """Serializer for User objects"""
+
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'name', 'is_active', 'is_limited', 'is_partner', 'is_staff', 'is_superuser')
+        read_only_fields = ('id',)
 
 class KollegeSerializer(serializers.ModelSerializer):
     """Serializer for equipe objects"""

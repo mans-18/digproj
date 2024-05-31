@@ -249,14 +249,13 @@ class UserList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView):
 
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes = [permissions.IsAuthenticated,]
     # pylint: disable=no-member
     queryset = User.objects.all()
     serializer_class = UserSerializer
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, *args, **kwargs):
-        
         txt = request.headers
         print('request.data',txt)
 
@@ -274,7 +273,7 @@ class UserDetail(mixins.RetrieveModelMixin,
     serializer_class = UserSerializer
 
     #permission_classes =[IsSuperOrReadOnly, permissions.IsAuthenticatedOrReadOnly,]
-    permission_classes =[permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes =[permissions.IsAuthenticated,]
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, *args, **kwargs):
@@ -293,7 +292,7 @@ class KollegeList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView):
 
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes = [permissions.IsAuthenticated,]
     # pylint: disable=no-member
     queryset = Kollege.objects.all()
     serializer_class = KollegeSerializer
@@ -375,7 +374,7 @@ class KollegeDetail(mixins.RetrieveModelMixin,
 
     #permission_classes =[permissions.IsAdminUser,]
     #permission_classes =[IsSuperOrReadOnly, permissions.IsAuthenticatedOrReadOnly,]
-    permission_classes =[permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes =[permissions.IsAuthenticated,]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -393,14 +392,13 @@ class PartnerList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView):
 
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes = [permissions.IsAuthenticated,]
     # pylint: disable=no-member
     queryset = Partner.objects.all()
     serializer_class = PartnerSerializer
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, *args, **kwargs):
-        
         txt = request.headers
         print('request.data',txt)
 
@@ -418,7 +416,7 @@ class PartnerDetail(mixins.RetrieveModelMixin,
     serializer_class = PartnerSerializer
 
     #permission_classes =[IsSuperOrReadOnly, permissions.IsAuthenticatedOrReadOnly,]
-    permission_classes =[permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes =[permissions.IsAuthenticated,]
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, *args, **kwargs):
@@ -437,8 +435,8 @@ class PersonaList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView):
 
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
-    # pylint: disable=no-member
+    permission_classes = [permissions.IsAuthenticated,]
+    # pylint: disable=no-member:
     queryset = Persona.objects.all()
     serializer_class = PersonaSerializer
     # filter_backends = [django_filters.rest_framework.DjangoFilterBackend]#(DjangoFilterBackend,)
@@ -483,7 +481,7 @@ class PersonaDetail(mixins.RetrieveModelMixin,
     serializer_class = PersonaSerializer
 
     #permission_classes =[IsSuperOrReadOnly, permissions.IsAuthenticatedOrReadOnly,]
-    permission_classes =[permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes =[permissions.IsAuthenticated,]
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, *args, **kwargs):
@@ -507,16 +505,15 @@ class EventList(mixins.ListModelMixin,
                 generics.GenericAPIView):
     # pylint: disable=no-member
     #permission_classes =[IsSuperOrReadOnly, permissions.IsAuthenticatedOrReadOnly,]
-    permission_classes =[permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes =[permissions.IsAuthenticated,]
     authentication_classes = (TokenAuthentication,)
 
     queryset = Event.objects.all()
     serializer_class = EventSerializer
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_limited:
-            # print('user ', request.user)
-            return self.list(request, *args, **kwargs)
+        # print('user ', request.user)
+        return self.list(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         # print('user ', request.user)
@@ -532,7 +529,7 @@ class EventDetail(mixins.RetrieveModelMixin,
     serializer_class = EventSerializer
 
     #permission_classes =[IsSuperOrReadOnly, permissions.IsAuthenticatedOrReadOnly,]
-    permission_classes =[permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes =[permissions.IsAuthenticated,]
     authentication_classes = (TokenAuthentication,)
 
     ############################################
@@ -627,7 +624,7 @@ class GenericGroupList(mixins.ListModelMixin,
                        mixins.CreateModelMixin,
                        generics.GenericAPIView):
     # pylint: disable=no-member
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes = [permissions.IsAuthenticated,]
     authentication_classes = (TokenAuthentication,)
 
     queryset = GenericGroup.objects.all()
@@ -648,7 +645,7 @@ class GenericGroupListDetail(mixins.RetrieveModelMixin,
     serializer_class = GenericGroupSerializer
 
     #permission_classes =[IsSuperOrReadOnly, permissions.IsAuthenticatedOrReadOnly,]
-    permission_classes =[permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes =[permissions.IsAuthenticated,]
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, *args, **kwargs):
@@ -673,15 +670,16 @@ class EventReportList(mixins.ListModelMixin,
                       mixins.CreateModelMixin,
                       generics.GenericAPIView):
 
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes = [permissions.IsAuthenticated,]
     authentication_classes = (TokenAuthentication,)
     # pylint: disable=no-member
     queryset = EventReport.objects.all()
     serializer_class = EventReportSerializer
 
     def get(self, request, *args, **kwargs):
-        # print('user ', request.user)
-        return self.list(request, *args, **kwargs)
+        if request.user.is_staff or request.user.is_partner:
+            # print('user ', request.user)
+            return self.list(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         # print('user ', request.user)
@@ -697,7 +695,7 @@ class EventReportDetail(mixins.RetrieveModelMixin,
     queryset = EventReport.objects.all()
     serializer_class = EventReportSerializer
 
-    permission_classes =[permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes =[permissions.IsAuthenticated,]
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, *args, **kwargs):

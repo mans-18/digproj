@@ -32,16 +32,28 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     """Custom user model that supports using email instead of username"""
-    # User (4)
+    # User (7)
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=255)
+
+    # Added is_limited, is_partner, is_staff
     is_active = models.BooleanField(default=True)
+    is_limited = models.BooleanField(default=False)
+    is_partner = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
 
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
 
+    # Added after above adding
+    def __str__(self):
+        return self.name
+    
+    # Added after above adding
+    class Meta:
+        ordering = ['name']
 
 class Kollege(models.Model):
     """Equipe to be used for a Persona"""
@@ -233,7 +245,8 @@ class Persona(models.Model):
     complement = models.CharField(null=True, max_length=100, blank=True)
     postalcode = models.CharField(null=True, max_length=20, blank=True)
     dob = models.DateField(null=True, blank=True)
-    registerdate = models.DateTimeField(null=True, default=timezone.now)
+    registerdate = models.DateTimeField(null=True)
+    #registerdate = models.DateTimeField(null=True, default=timezone.now)
     comment = models.CharField(null=True, max_length=255, blank=True)
     #kollegen = models.ManyToManyField('Kollege')
     #events = models.ManyToManyField('Event')

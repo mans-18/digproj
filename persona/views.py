@@ -292,7 +292,7 @@ class KollegeList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView):
 
-    permission_classes = [permissions.IsAuthenticated,]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
     # pylint: disable=no-member
     queryset = Kollege.objects.all()
     serializer_class = KollegeSerializer
@@ -435,7 +435,7 @@ class PersonaList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView):
 
-    permission_classes = [permissions.IsAuthenticated,]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
     # pylint: disable=no-member:
     queryset = Persona.objects.all()
     serializer_class = PersonaSerializer
@@ -477,11 +477,12 @@ class PersonaDetail(mixins.RetrieveModelMixin,
                     mixins.DestroyModelMixin,
                     generics.GenericAPIView):
     # pylint: disable=no-member
+    #permission_classes =[IsSuperOrReadOnly, permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes =[permissions.IsAuthenticated,]
+
     queryset = Persona.objects.all()
     serializer_class = PersonaSerializer
 
-    #permission_classes =[IsSuperOrReadOnly, permissions.IsAuthenticatedOrReadOnly,]
-    permission_classes =[permissions.IsAuthenticated,]
     authentication_classes = (TokenAuthentication,)
 
     def get(self, request, *args, **kwargs):

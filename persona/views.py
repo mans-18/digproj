@@ -29,6 +29,7 @@ from persona.serializers import (UserSerializer,
                                  EventSerializer,
                                  EventReportSerializer,
                                  PartnerSerializer,
+                                 ProcedureSerializer,
                                  GenericGroupSerializer,
                                  EmailFromSiteSerializer)
 
@@ -37,7 +38,7 @@ from django.http import Http404, HttpRequest, HttpResponse
 
 from collections import defaultdict
 
-from core.models import User, Kollege, Event, Persona, GenericGroup, EventReport, Partner
+from core.models import User, Kollege, Event, Persona, GenericGroup, EventReport, Partner, Procedure
 
 from persona import serializers
 
@@ -414,6 +415,48 @@ class PartnerDetail(mixins.RetrieveModelMixin,
     # pylint: disable=no-member
     queryset = Partner.objects.all()
     serializer_class = PartnerSerializer
+
+    #permission_classes =[IsSuperOrReadOnly, permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes =[permissions.IsAuthenticated,]
+    authentication_classes = (TokenAuthentication,)
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        if (request.user.is_staff) & (not request.user.is_limited):
+            return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        if request.user.is_superuser:
+            return self.destroy(request, *args, **kwargs)
+        
+class ProcedureList(mixins.ListModelMixin,
+                  mixins.CreateModelMixin,
+                  generics.GenericAPIView):
+
+    permission_classes = [permissions.IsAuthenticated,]
+    # pylint: disable=no-member
+    queryset = Procedure.objects.all()
+    serializer_class = ProcedureSerializer
+    authentication_classes = (TokenAuthentication,)
+
+    def get(self, request, *args, **kwargs):
+        txt = request.headers
+        print('request.data',txt)
+
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+class ProcedureDetail(mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin,
+                    mixins.DestroyModelMixin,
+                    generics.GenericAPIView):
+    # pylint: disable=no-member
+    queryset = Procedure.objects.all()
+    serializer_class = ProcedureSerializer
 
     #permission_classes =[IsSuperOrReadOnly, permissions.IsAuthenticatedOrReadOnly,]
     permission_classes =[permissions.IsAuthenticated,]

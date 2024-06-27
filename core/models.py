@@ -94,6 +94,24 @@ class Partner(models.Model):
         ordering = ['name']
         index_together = (('name', 'crm'),)
 
+class Procedure(models.Model):
+    """Procedures and values delivered"""
+    # Partner (6)
+    name = models.CharField(max_length=255, unique=True)
+    code = models.CharField(null=True, max_length=15, blank=True, unique=True)
+    value1 = models.CharField(null=True, max_length=15, blank=True)
+    value2 = models.CharField(null=True, max_length=15, blank=True)
+    value3 = models.CharField(null=True, max_length=25, blank=True)
+    genericChar = models.CharField(null=True, max_length=255, blank=True)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        unique_together = (('name', 'code'),)
+        ordering = ['name']
+        index_together = (('name', 'code'),)
+
 
 class Event(models.Model):
     """Event to occur to a persona = 19 fields + ID"""

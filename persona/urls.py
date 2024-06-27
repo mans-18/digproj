@@ -54,7 +54,7 @@ urlpatterns =[
       path('procedure/',
            views.ProcedureList.as_view(),
            name='procedure-list'),
-      path('procedure/<int:pk/',
+      path('procedure/<int:pk>/',
            views.ProcedureDetail.as_view(),
            name='procedure-detail'),
       path('eventreports/',

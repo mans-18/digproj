@@ -10,7 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ('email', 'password', 'name')
+        fields = ('id', 'email', 'password', 'name', 'is_active', 'is_limited', 'is_partner', 'is_staff', 'is_superuser')
         extra_kwargs = {'password': {'write_only': True, 'min_length': 5}}
 
     # validated_data is all the data that is passed in the serializer in json.

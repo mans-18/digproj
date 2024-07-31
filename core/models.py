@@ -67,6 +67,9 @@ class Kollege(models.Model):
     crm = models.CharField(null=True, max_length=15, blank=True)
     email = models.EmailField(null=True, blank=True)
     mobile = models.CharField(max_length=20, blank=True)
+    agenda = models.TextField(null=True, blank=True)
+    genericChar = models.CharField(null=True, max_length=255, blank=True)
+
 
     def __str__(self):
         return self.name
@@ -85,6 +88,8 @@ class Partner(models.Model):
     mobile = models.CharField(max_length=20)
     whatsapp = models.CharField(null=True, max_length=20, blank=True)
     telephone = models.CharField(null=True, max_length=20, blank=True)
+    genericChar = models.CharField(null=True, max_length=255, blank=True)
+
 
     def __str__(self):
         return self.name
@@ -140,6 +145,8 @@ class Event(models.Model):
     genericNumber1 = models.FloatField(null=True, blank=True)
     genericNumber2 = models.FloatField(null=True, blank=True)
     genericNumber3 = models.FloatField(null=True, blank=True)
+    genericText = models.TextField(null=True, blank=True)
+
 
     persona = models.ForeignKey('Persona',
                                 on_delete=models.CASCADE,
@@ -231,6 +238,7 @@ class EventReport(models.Model):
     conc5 = models.CharField(null=True, max_length=255, blank=True)
     conc6 = models.CharField(null=True, max_length=255, blank=True)
     complications = models.CharField(null=True, max_length=255, blank=True)
+    genericChar = models.CharField(null=True, max_length=255, blank=True)
     #event = models.OneToOneField('Event', on_delete=models.CASCADE,)
     #500 Error: no field 'id' in eventreport. Or, integrity error, occurred cause Django created an auto id as primary key.
     #The primary key must be the event.

@@ -250,7 +250,8 @@ class UserList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView):
 
-    permission_classes = [permissions.IsAuthenticated,]
+    permission_classes =[IsSuperOrReadOnly, permissions.IsAuthenticatedOrReadOnly,]
+    #permission_classes = [permissions.IsAuthenticated,]
     # pylint: disable=no-member
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -293,7 +294,8 @@ class KollegeList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView):
 
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes =[permissions.IsAuthenticated,]
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
     # pylint: disable=no-member
     queryset = Kollege.objects.all()
     serializer_class = KollegeSerializer
@@ -478,7 +480,8 @@ class PersonaList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView):
 
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
+    permission_classes =[permissions.IsAuthenticated,]
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
     # pylint: disable=no-member:
     queryset = Persona.objects.all()
     serializer_class = PersonaSerializer
@@ -561,7 +564,8 @@ class EventList(mixins.ListModelMixin,
 
     def post(self, request, *args, **kwargs):
         # print('user ', request.user)
-        return self.create(request, *args, **kwargs)
+        if (request.user.is_staff) & (not request.user.is_limited):
+            return self.create(request, *args, **kwargs)
 
 
 class EventDetail(mixins.RetrieveModelMixin,

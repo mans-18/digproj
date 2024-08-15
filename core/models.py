@@ -85,7 +85,7 @@ class Partner(models.Model):
     name = models.CharField(max_length=255, unique=True)
     crm = models.CharField(null=True, max_length=15, blank=True)
     email = models.EmailField(null=True, blank=True)
-    mobile = models.CharField(max_length=20)
+    mobile = models.CharField(max_length=20, null=True, blank=True)
     whatsapp = models.CharField(null=True, max_length=20, blank=True)
     telephone = models.CharField(null=True, max_length=20, blank=True)
     genericChar = models.CharField(null=True, max_length=255, blank=True)

@@ -63,6 +63,9 @@ urlpatterns =[
       path('eventreports/<int:pk>/',
             views.EventReportDetail.as_view(),
             name='eventreport-detail'),
+#     path('upload-pdf/',
+ #           PDFUploadView.as_view(),
+  #          name='pdf-upload'),
 ]
 '''
     path('personas/',

@@ -20,11 +20,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 ALLOWED_HOSTS = [
-    '44.198.138.125', #AWS Elastic IP 22-3-24
-    '34.201.127.247', #AWS digproj 21-3-24
-    '44.202.142.53', #AWS digproj 20-3-24
-    '54.175.161.178', #AWS digproj 19-3-24
-    '54.174.42.144',
+    '52.44.41.170', #AWS Elastic IP 26-12-24 for instance digproj1224
+    '44.198.138.125', #AWS Elastic IP 22-3-24 for instance digproj
     'digest.com.br',
     'localhost',
     '127.0.0.1',
@@ -48,6 +45,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'core',
     'django_filters',
+#   'storages',
     'user',
     'persona',
 ]
@@ -96,6 +94,8 @@ DATABASES = {
         'PORT': config('DATABASE_URL').split(':')[-1].split('/')[0],
     }
 }
+
+#SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
 
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -152,3 +152,16 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     }
 }
+
+#AWS_ACCESS_KEY_ID = config('your-access-key-id')
+#AWS_SECRET_ACCESS_KEY = config('your-secret-access-key')
+#AWS_STORAGE_BUCKET_NAME = config('your-bucket-name')
+#AWS_S3_REGION_NAME = config('your-region')  # e.g., 'us-east-1'
+
+"""Added 22-12-25"""
+
+#SECURE_SSL_REDIRECT = True
+#SESSION_COOKIE_SECURE = True
+#CSRF_COOKIE_SECURE = True
+
+

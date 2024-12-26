@@ -82,10 +82,10 @@ class Kollege(models.Model):
 class Partner(models.Model):
     """Doctor or Clinics the persona comes from"""
     # Partner (6)
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(null=True, max_length=255, blank=True)
     crm = models.CharField(null=True, max_length=15, blank=True)
     email = models.EmailField(null=True, blank=True)
-    mobile = models.CharField(max_length=20)
+    mobile = models.CharField(max_length=20, null=True, blank=True)
     whatsapp = models.CharField(null=True, max_length=20, blank=True)
     telephone = models.CharField(null=True, max_length=20, blank=True)
     genericChar = models.CharField(null=True, max_length=255, blank=True)
@@ -138,7 +138,7 @@ class Event(models.Model):
     addtitle2 = models.CharField(null=True, max_length=100, blank=True)
     addtitle3 = models.CharField(null=True, max_length=100, blank=True)
     comment = models.CharField(null=True, max_length=255, blank=True)
-    genericChar1 = models.CharField(null=True, max_length=255, blank=True)
+    genericChar1 = models.TextField(null=True, blank=True)
     genericChar2 = models.CharField(null=True, max_length=255, blank=True)
     genericChar3 = models.CharField(null=True, max_length=255, blank=True)
     genericTime1 = models.DateTimeField(null=True, blank=True)
@@ -271,7 +271,7 @@ class Persona(models.Model):
     complement = models.CharField(null=True, max_length=100, blank=True)
     postalcode = models.CharField(null=True, max_length=20, blank=True)
     dob = models.DateField(null=True, blank=True)
-    registerdate = models.DateTimeField(null=True)
+    registerdate = models.DateTimeField(null=True, blank=True)
     #registerdate = models.DateTimeField(null=True, default=timezone.now)
     comment = models.CharField(null=True, max_length=255, blank=True)
     #kollegen = models.ManyToManyField('Kollege')
@@ -279,8 +279,8 @@ class Persona(models.Model):
 
     class Meta:
         ordering = ['name']
-        unique_together = (('name', 'dob'),)
-        index_together = (('name', 'dob'),)
+        unique_together = (('name', 'mobile'),)
+        index_together = (('name', 'mobile'),)
 
     def __str__(self):
         return self.name

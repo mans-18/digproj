@@ -72,9 +72,11 @@ class EmailKollege(mixins.ListModelMixin,
             # data = defaultdict(list)
             # for title, start in qs.values_list('title', 'start'):
             #     data[title].append(start)
-            # print(data
+            print(request)
+            print(request.body)
+            print(request.body.decode())
 
-            toEmail = []
+            toEmail = ['digest.principal@gmail.com',]
             kolIds = []
             # Decodes the bytes obj to a str, and parses it to a json dict
             # "multiple" at the dashboard html delivers a dictionary. Without it, delivers a list of keys
@@ -82,9 +84,10 @@ class EmailKollege(mixins.ListModelMixin,
             kolListToMail = json.loads(request.body.decode())
             for item in kolListToMail:
                 # Append a dict value
-                toEmail.append(item["email"])
+                toEmail.append(item['email'])
                 kolIds.append(item['id'])
                 #print(kolListToMail, kolIds, toEmail)
+           # print('kolListToMail, kolIds, toEmail: ', kolListToMail, kolIds, toEmail)
             print('request body count', len(request.body.decode()))
             print('toEmail count', len(toEmail))
             toEmailCount = len(toEmail)
@@ -99,7 +102,7 @@ class EmailKollege(mixins.ListModelMixin,
 
             kl = Kollege.objects.all().values()
             lkl = list(kl)
-            #print('This lkl',lkl)
+           # print('This kl and  lkl',kl, lkl)
 
             ##### Shows a list of events from a single kollege ####
             eventList = []
@@ -119,14 +122,38 @@ class EmailKollege(mixins.ListModelMixin,
                                         extra = koltotal['name']
             print('this extra', extra)
 
-            #### This is done on the template ######
+            per_name = ''
+            for per in lps:
+                for ev in lqs:
+                    if per['id'] == ev['persona_id']:
+                        per_name = per['name'].title()
+
+#            for kol in lkl:
+ #                for ev in lqs:
+  #                   for per in lps:
+   #                      if kol['id'] == ev['kollege_id']:
+    #                         if per['id'] == ev['persona_id']:
+#				 msg_html = render_to_string('email.html',
+#				     {'event_data':eventList, 'persona_data':lps, 'per_name':per_names, 'kollege_data':lkl, 'extra': extra, 'toEmailCount':toEmailCount})
+ #                                print(per['name'], kol['crm'], ev['title'], ev['start'])
+
+           # for kol in lkl:
+            #    for ev in lqs:
+                   # for per in lps:
+                       # if kol['id'] == ev['kollege_id']:
+                           # if per['id'] == ev['persona_id']:
+                             #   msg_html = render_to_string('email.html',
+                              #      {'event_data':eventList, 'persona_data':lps,'per_name':per_name, 'kollege_data':lkl, 'extra': extra, 'toEmailCount':toEmailCount})
+                               # print(per['name'], kol['crm'], ev['title'], ev['start'])
+
+#### This is done on the template ######
             # mailList_p = []
             # for ev in lqs:
             #     for item in lps:
             #         if item['id'] == ev['persona_id']:
             #             mailList_p.append(item)
 
-            msg_html = render_to_string('email.html', {'event_data':eventList, 'persona_data':lps,
+            msg_html = render_to_string('email2.html', {'event_data':eventList, 'persona_data':lps, 'per_name':per_name,
                                         'kollege_data':lkl, 'extra': extra, 'toEmailCount':toEmailCount})
             # return send_mail('Digest Agenda',
             #     msg_html,
@@ -139,7 +166,8 @@ class EmailKollege(mixins.ListModelMixin,
                             template_email_text,
                             'miguel.sza@gmail.com',
                             toEmail,
-                            html_message=msg_html)
+                            html_message=msg_html,
+                            fail_silently=False)
     
     def post(self, request, *args, **kwargs):
         # id = []
@@ -403,7 +431,7 @@ class PartnerList(mixins.ListModelMixin,
 
     def get(self, request, *args, **kwargs):
         txt = request.headers
-        print('request.data',txt)
+       # print('request.data',txt)
 
         return self.list(request, *args, **kwargs)
 
@@ -766,8 +794,26 @@ class EventReportDetail(mixins.RetrieveModelMixin,
     def delete(self, request, *args, **kwargs):
         if request.user.is_superuser:
             return self.destroy(request, *args, **kwargs)
+'''
+class PDFUploadView(APIView):
+    parser_classes = (MultiPartParser,)
 
+    def post(self, request, *args, **kwargs):
+        file = request.FILES['file']
 
+           # Upload to AWS S3
+        s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                          aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                          region_name=settings.AWS_S3_REGION_NAME)
+
+        try:
+            s3.upload_fileobj(file, settings.AWS_STORAGE_BUCKET_NAME, file.name)
+            return Response({"message": "Upload successful!"}, status=status.HTTP_201_CREATED)
+        except NoCredentialsError:
+            return Response({"error": "AWS credentials not found."}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+'''
 # # API ORIGINAL, BASEADO NO COURSE RECIPE. ACIMA MODIFICAMOS O VIEW CONFORME O REST/PRODUCT QUE FUNCIONOU COM O PROJ ANGUKAR MOVIE-RATER
 # '''
 # Formato Browser Api (# em renderer_classes, template_name e return Response(dict))

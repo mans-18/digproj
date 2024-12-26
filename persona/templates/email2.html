@@ -1,0 +1,34 @@
+
+<h1>Bom dia!!!</h1>
+{% if toEmailCount < 4 %}
+
+{% if extra %}
+{% if event_data %}
+{% if kollege_data %}
+<h2>Dr(a) {{extra}},</h2>
+
+<h2>Esta é sua agenda de amanhã conosco:</h2>
+<ul>
+
+    {% for kol in kollege_data %}
+        {% for ev in event_data %}
+		{% if ev.color != '#FFFFFF' %}
+                <p>
+                    {% if kol.id == ev.kollege_id %}
+                           Cliente: {{ev.persona_id}}<br>
+                           Exame: {{ev.title}}<br>
+			   Data: {{ev.start}}
+                    {% endif %}
+                </p>
+		{% endif %}
+        {% endfor %}
+    {% endfor %}
+</ul>
+{% endif %}
+{% endif %}
+{% endif %}
+{% endif %}<br>
+<h2>Digest</h2>
+<p>85 996288800</p>
+<p>85 32241547</p>
+

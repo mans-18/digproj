@@ -431,7 +431,6 @@ class PartnerList(mixins.ListModelMixin,
 
     def get(self, request, *args, **kwargs):
         txt = request.headers
-       # print('request.data',txt)
 
         return self.list(request, *args, **kwargs)
 

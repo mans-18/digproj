@@ -18,6 +18,14 @@ urlpatterns =[
       path('events/',
             views.EventList.as_view(),
             name='event-list'),
+######### 10-1-25 #########################
+      path('events-limited/',
+            views.EventListLimited.as_view(),
+            name='event-list-limited'),
+      path('personas-limited/',
+            views.PersonaListLimited.as_view(),
+            name='persona-list-limited'),
+###########################################
       path('events/<int:pk>/',
             views.EventDetail.as_view(),
             name='event-detail'),

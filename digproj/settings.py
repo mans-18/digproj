@@ -30,6 +30,9 @@ ALLOWED_HOSTS = [
 #evironment vars done (DEBUG, SECRET_KEY, DB, EMAIL) with decouple.config
 #stored at .env (must go to .gitignore)
 #DEBUG = True
+############## For local DB, localhost ###########
+#SECRET_KEY='h%$7j91w!qrkc=ve+0g#^vz)x=n-9@-b70fs@6a*fb$m9^4mxx'
+##################################################
 DEBUG = config('DEBUG', default=False, cast=bool)
 SECRET_KEY = config('SECRET_KEY')
 
@@ -94,6 +97,19 @@ DATABASES = {
         'PORT': config('DATABASE_URL').split(':')[-1].split('/')[0],
     }
 }
+
+############## For local DB, localhost ###########
+DATABASES = {
+     'default': {
+         'ENGINE': 'django.db.backends.postgresql',
+         'NAME': 'dig',
+         'USER': 'postgres',
+         'PASSWORD': 'leugim2020',
+         'HOST': 'localhost',
+         'PORT': '5432',
+     }
+}
+##################################################
 
 #SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
 

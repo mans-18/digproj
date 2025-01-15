@@ -150,9 +150,10 @@ class Event(models.Model):
 
     persona = models.ForeignKey('Persona',
                                 on_delete=models.CASCADE,
-                                related_name='events-persona+')
+                                related_name='event_persona')
     kollege = models.ForeignKey('Kollege',
-                                 on_delete=models.CASCADE)
+                                 on_delete=models.CASCADE,
+                                 related_name='event_kollege')
     # This onr to one permits multiple eventReports per event
     #eventReport = models.OneToOneField('EventReport', on_delete=models.CASCADE)
     #eventreport = models.ForeignKey('EventReport',

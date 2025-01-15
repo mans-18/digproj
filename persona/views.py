@@ -22,6 +22,7 @@ import argparse
 import django_filters.rest_framework
 from django_filters.rest_framework import DjangoFilterBackend
 from django.template.loader import render_to_string
+from django.db.models import Q
 
 from persona.serializers import (UserSerializer,
                                  KollegeSerializer,
@@ -502,7 +503,6 @@ class ProcedureDetail(mixins.RetrieveModelMixin,
         if request.user.is_superuser:
             return self.destroy(request, *args, **kwargs)
 
-
 class PersonaList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView):
@@ -510,7 +510,16 @@ class PersonaList(mixins.ListModelMixin,
     permission_classes =[permissions.IsAuthenticated,]
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
     # pylint: disable=no-member:
+    
     queryset = Persona.objects.all()
+
+    #queryset = Persona.objects.filter(event_persona__gt=2000)
+    # Lookup reverse from Persona into Event, by the event_persona related_name.
+    # Then filter accordind to start field
+    #queryset = Persona.objects.filter(
+    #    event_persona__start__gt=datetime.date.today()-timedelta(days=1),
+    #    event_persona__start__lte=datetime.date.today()+timedelta(days=4))
+
     serializer_class = PersonaSerializer
     # filter_backends = [django_filters.rest_framework.DjangoFilterBackend]#(DjangoFilterBackend,)
     # filterset_fields = ('name',)
@@ -545,6 +554,39 @@ class PersonaList(mixins.ListModelMixin,
     #     if name.lower() is not None:
     #         return queryset.filter(name__icontains=name)
 
+class PersonaListLimited(mixins.ListModelMixin,
+                  mixins.CreateModelMixin,
+                  generics.GenericAPIView):
+
+    permission_classes =[permissions.IsAuthenticated,]
+    
+    #queryset = Persona.objects.filter(event_persona__gt=2000)
+    # Lookup reverse from Persona into Event, by the event_persona related_name.
+    # Then filter accordind to start field
+    # Include a persona as many times as there is an event associated with
+    # she in the timeframe (loops across events and repeats persona for each event found)
+    queryset_t1 = Persona.objects.filter(
+        event_persona__start__gt=datetime.date.today()-timedelta(days=1),
+        event_persona__start__lte=datetime.date.today()+timedelta(days=7))
+    # Remove duplicates from queryset_t1
+    queryset_t2 = set(queryset_t1)
+    queryset = list(queryset_t2)
+
+    serializer_class = PersonaSerializer
+    # filter_backends = [django_filters.rest_framework.DjangoFilterBackend]#(DjangoFilterBackend,)
+    # filterset_fields = ('name',)
+    # Needed to search from the url
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name','dob','email','mobile']
+
+    authentication_classes = (TokenAuthentication,)
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
 class PersonaDetail(mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin,
                     mixins.DestroyModelMixin,
@@ -573,7 +615,6 @@ class PersonaDetail(mixins.RetrieveModelMixin,
         if request.user.is_superuser:
             return self.destroy(request, *args, **kwargs)
 
-
 class EventList(mixins.ListModelMixin,
                 mixins.CreateModelMixin,
                 generics.GenericAPIView):
@@ -583,6 +624,37 @@ class EventList(mixins.ListModelMixin,
     authentication_classes = (TokenAuthentication,)
 
     queryset = Event.objects.all()
+
+    #queryset = Event.objects.order_by('start').filter(
+    #    start__gte=datetime.date.today()-timedelta(days=1),
+    #    start__lte=datetime.date.today()+timedelta(days=4)).values()
+    
+    serializer_class = EventSerializer
+
+    def get(self, request, *args, **kwargs):
+        # print('user ', request.user)
+        #print('Events filtered', Event.objects.order_by('start').filter(Q(start__gte=datetime.date.today()-timedelta(days=0)) & Q(start__lte=datetime.date.today()+timedelta(days=1))).values())
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        # print('user ', request.user)
+        if (request.user.is_staff) & (not request.user.is_limited):
+            return self.create(request, *args, **kwargs)
+
+####################### 10-1-25 ###########################################
+
+class EventListLimited(mixins.ListModelMixin,
+                mixins.CreateModelMixin,
+                generics.GenericAPIView):
+    
+    permission_classes =[permissions.IsAuthenticated,]
+    authentication_classes = (TokenAuthentication,)
+    #queryset = Event.objects.all()
+    #queryset = Event.objects.order_by('start').filter(
+    queryset = Event.objects.filter(
+        start__gte=datetime.date.today()-timedelta(days=1),
+        start__lte=datetime.date.today()+timedelta(days=7))
+    
     serializer_class = EventSerializer
 
     def get(self, request, *args, **kwargs):
@@ -594,6 +666,7 @@ class EventList(mixins.ListModelMixin,
         if (request.user.is_staff) & (not request.user.is_limited):
             return self.create(request, *args, **kwargs)
 
+########################################################################
 
 class EventDetail(mixins.RetrieveModelMixin,
                   mixins.UpdateModelMixin,

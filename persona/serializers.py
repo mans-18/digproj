@@ -10,6 +10,25 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'email', 'name', 'is_active', 'is_limited', 'is_partner', 'is_staff', 'is_superuser')
         read_only_fields = ('id',)
 
+class PersonaSerializer(serializers.ModelSerializer):
+    """Serializer for persona obj"""
+#    events = serializers.PrimaryKeyRelatedField(
+#       many=True,
+#        queryset=Event.objects.all()
+#   )
+#   kollegen = serializers.PrimaryKeyRelatedField(
+#       many=True,
+#       queryset=Kollege.objects.all()
+#   )
+
+    class Meta:
+        model = Persona
+        fields = ('id', 'name', 'mobile', 'whatsapp', 'telephone', 'email',
+                  'street', 'complement', 'postalcode', 'dob', 'registerdate',
+                  'comment', #'kollegen', 'events'
+                  )
+        read_only_fields = ('id',)
+
 class KollegeSerializer(serializers.ModelSerializer):
     """Serializer for equipe objects"""
 
@@ -36,9 +55,19 @@ class ProcedureSerializer(serializers.ModelSerializer):
 
 class EventSerializer(serializers.ModelSerializer):
     """ Serializer for event objects - 20 fields"""
+# No effect
+#    persona = PersonaSerializer(many=True, read_only=True)
+#    kollege = KollegeSerializer(many=True, read_only=True)
+#    persona = serializers.PrimaryKeyRelatedField(
+ #       many=True,
+    #    queryset=Persona.objects.all()
+  #     )
 
     class Meta:
         model = Event
+        ### changed field persona and kollege for persona_id  and kollege_id
+        ### needed to filter the queryset on view.py. But breaks the names on the events tab
+        ### had to change on the html also
         fields = ('id', 'title', 'partner', 'start', 'color', 'status', 'insurance', 'resourceId',
                   'addtitle1', 'addtitle2', 'addtitle3', 'comment', 'genericChar1',
                   'genericChar2', 'genericChar3', 'genericTime1', 'genericNumber1',
@@ -57,27 +86,6 @@ class EventReportSerializer(serializers.ModelSerializer):
                 'urease', 'biopsy', 'hystoResults', 'prep', 'quality', 'colo', 'genericDescription',
                 'conc1', 'conc2', 'conc3', 'conc4', 'conc5', 'conc6', 'complications', 'event')
         read_only_fields = ('id',)
-
-
-class PersonaSerializer(serializers.ModelSerializer):
-    """Serializer for persona obj"""
-#    events = serializers.PrimaryKeyRelatedField(
-#       many=True,
-#        queryset=Event.objects.all()
-#   )
-#   kollegen = serializers.PrimaryKeyRelatedField(
-#       many=True,
-#       queryset=Kollege.objects.all()
-#   )
-
-    class Meta:
-        model = Persona
-        fields = ('id', 'name', 'mobile', 'whatsapp', 'telephone', 'email',
-                  'street', 'complement', 'postalcode', 'dob', 'registerdate',
-                  'comment', #'kollegen', 'events'
-                  )
-        read_only_fields = ('id',)
-
 
 class PersonaDetailSerializer(PersonaSerializer):
     """Serialize a persona detail"""

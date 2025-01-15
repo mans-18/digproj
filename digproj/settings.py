@@ -99,16 +99,16 @@ DATABASES = {
 }
 
 ############## For local DB, localhost ###########
-DATABASES = {
-     'default': {
-         'ENGINE': 'django.db.backends.postgresql',
-         'NAME': 'dig',
-         'USER': 'postgres',
-         'PASSWORD': 'leugim2020',
-         'HOST': 'localhost',
-         'PORT': '5432',
-     }
-}
+#DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+ #        'NAME': 'dig',
+  #       'USER': '',
+   #      'PASSWORD': '',
+    #     'HOST': 'localhost',
+     #    'PORT': '5432',
+#     }
+#}
 ##################################################
 
 #SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"

@@ -95,6 +95,7 @@ DATABASES = {
         'PASSWORD': config('DATABASE_URL').split(':')[2].split('@')[0],
         'HOST': config('DATABASE_URL').split('@')[1].split(':')[0],
         'PORT': config('DATABASE_URL').split(':')[-1].split('/')[0],
+        'CONN_MAX_AGE': 0,
     }
 }
 

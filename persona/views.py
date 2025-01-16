@@ -569,8 +569,8 @@ class PersonaListLimited(mixins.ListModelMixin,
         event_persona__start__gt=datetime.date.today()-timedelta(days=1),
         event_persona__start__lte=datetime.date.today()+timedelta(days=7))))
     # Remove duplicates from queryset_t1
-    # If I split the queryset code, th persona is not shown (undefined) when a new event is created
-    # If it is done all at a once, like above, the above problem does not occur.
+    # If I split the queryset code, th persona is not shown even in localserver (undefined) when a new event is created
+    # If it is done all at a once, like above, the above problem does not occur, but keeps over internet.
     #queryset_t1 = Persona.objects.filter(
     #    event_persona__start__gt=datetime.date.today()-timedelta(days=1),
     #    event_persona__start__lte=datetime.date.today()+timedelta(days=7))

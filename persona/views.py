@@ -658,7 +658,7 @@ class EventListLimited(mixins.ListModelMixin,
     #queryset = Event.objects.order_by('start').filter(
     queryset = Event.objects.filter(
         start__gte=datetime.date.today()-timedelta(days=1),
-        start__lte=datetime.date.today()+timedelta(days=7))
+        start__lte=datetime.date.today()+timedelta(days=7)).exclude(color='#FFFFFF')
     
     serializer_class = EventSerializer
 

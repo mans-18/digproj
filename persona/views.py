@@ -565,12 +565,17 @@ class PersonaListLimited(mixins.ListModelMixin,
     # Then filter accordind to start field
     # Include a persona as many times as there is an event associated with
     # she in the timeframe (loops across events and repeats persona for each event found)
-    queryset_t1 = Persona.objects.filter(
+    queryset = list(set(Persona.objects.filter(
         event_persona__start__gt=datetime.date.today()-timedelta(days=1),
-        event_persona__start__lte=datetime.date.today()+timedelta(days=7))
+        event_persona__start__lte=datetime.date.today()+timedelta(days=7))))
     # Remove duplicates from queryset_t1
-    queryset_t2 = set(queryset_t1)
-    queryset = list(queryset_t2)
+    # If I split the queryset code, th persona is not shown (undefined) when a new event is created
+    # If it is done all at a once, like above, the above problem does not occur.
+    #queryset_t1 = Persona.objects.filter(
+    #    event_persona__start__gt=datetime.date.today()-timedelta(days=1),
+    #    event_persona__start__lte=datetime.date.today()+timedelta(days=7))
+    #queryset_t2 = set(queryset_t1)
+    #queryset = list(queryset_t2)
 
     serializer_class = PersonaSerializer
     # filter_backends = [django_filters.rest_framework.DjangoFilterBackend]#(DjangoFilterBackend,)

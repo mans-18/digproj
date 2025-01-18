@@ -21,7 +21,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 ALLOWED_HOSTS = [
     '52.44.41.170', #AWS Elastic IP 26-12-24 for instance digproj1224
-    '44.198.138.125', #AWS Elastic IP 22-3-24 for instance digproj
+    '18.234.234.117'
     'digest.com.br',
     'localhost',
     '127.0.0.1',

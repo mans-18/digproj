@@ -10,14 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterUniqueTogether(
-            name='persona',
-            unique_together={('name', 'mobile')},
-        ),
-        migrations.AlterIndexTogether(
-            name='persona',
-            index_together={('name', 'mobile')},
-        ),
         migrations.AlterField(
             model_name='event',
             name='genericChar1',

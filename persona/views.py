@@ -10,6 +10,8 @@ from rest_framework.reverse import reverse
 from persona.permissions import IsSuperOrReadOnly
 
 from django.core.mail import send_mail, EmailMessage
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_control
 import smtplib, datetime, cgi, json
 from email.mime.text import MIMEText
 from datetime import timedelta
@@ -586,6 +588,9 @@ class PersonaListLimited(mixins.ListModelMixin,
 
     authentication_classes = (TokenAuthentication,)
 
+    # The decorator prevents teh persona column on event.component being empty when creting a new event.
+    # Without it, the column would only be filled (defined) if the gunicorn serve was restarted.
+    @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=True))
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 

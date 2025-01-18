@@ -107,8 +107,8 @@ class Migration(migrations.Migration):
             ],
             options={
                 'ordering': ['name'],
-                'unique_together': {('name', 'dob')},
-                'index_together': {('name', 'dob')},
+                'unique_together': {('name', 'mobile')},
+                'index_together': {('name', 'mobile')},
             },
         ),
         migrations.CreateModel(

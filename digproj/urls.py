@@ -32,4 +32,6 @@ urlpatterns += [
     path('api-auth/', include('rest_framework.urls')),
     # from angular course
     path('auth/', obtain_auth_token),
+    path('auth/', views.EventList.as_view(),
+           name='event-list'),
 ]

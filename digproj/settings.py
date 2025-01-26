@@ -13,16 +13,18 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 from decouple import config
 from dj_database_url import parse as dburl
+from corsheaders.defaults import default_headers
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
 ALLOWED_HOSTS = [
     '52.44.41.170', #AWS Elastic IP 26-12-24 for instance digproj1224
-    '18.234.234.117'
+    '54.237.168.137' #AWS temp IP devDigproj1224
     'digest.com.br',
+    'api.digest.com.br',
     'localhost',
     '127.0.0.1',
 ]
@@ -95,7 +97,7 @@ DATABASES = {
         'PASSWORD': config('DATABASE_URL').split(':')[2].split('@')[0],
         'HOST': config('DATABASE_URL').split('@')[1].split(':')[0],
         'PORT': config('DATABASE_URL').split(':')[-1].split('/')[0],
-        'CONN_MAX_AGE': 0,
+#        'CONN_MAX_AGE': 600,
     }
 }
 
@@ -114,7 +116,21 @@ DATABASES = {
 
 #SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
 
-CORS_ORIGIN_ALLOW_ALL = True
+#CORS_ORIGIN_ALLOW_ALL = True
+
+############ Necessary #############
+CORS_ALLOWED_ORIGINS = [
+    'https://digest.com.br',
+    'http://localhost:4200',
+]
+
+CORS_ALLOW_HEADERS = list(default_headers) + ['CurrentUser',]
+#CSRF_TRUSTED_ORIGINS = [
+#    'https://api.digest.com.br',
+#]
+
+#CSRF_COOKIE_SECURE = True
+#SESSION_COOKIE_SECURE = True
 
 AUTH_PASSWORD_VALIDATORS = [
     {

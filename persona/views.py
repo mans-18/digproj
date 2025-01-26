@@ -10,6 +10,7 @@ from rest_framework.reverse import reverse
 from persona.permissions import IsSuperOrReadOnly
 
 from django.core.mail import send_mail, EmailMessage
+from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 import smtplib, datetime, cgi, json
@@ -513,8 +514,9 @@ class PersonaList(mixins.ListModelMixin,
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
     # pylint: disable=no-member:
     
-    queryset = Persona.objects.all()
-
+    #queryset = Persona.objects.all()
+    def get_queryset(self):
+        return Persona.objects.all()
     #queryset = Persona.objects.filter(event_persona__gt=2000)
     # Lookup reverse from Persona into Event, by the event_persona related_name.
     # Then filter accordind to start field
@@ -567,9 +569,15 @@ class PersonaListLimited(mixins.ListModelMixin,
     # Then filter accordind to start field
     # Include a persona as many times as there is an event associated with
     # she in the timeframe (loops across events and repeats persona for each event found)
-    queryset = list(set(Persona.objects.filter(
-        event_persona__start__gt=datetime.date.today()-timedelta(days=1),
-        event_persona__start__lte=datetime.date.today()+timedelta(days=7))))
+    #queryset = list(set(Persona.objects.filter(
+     #   event_persona__start__gt=datetime.date.today()-timedelta(days=1),
+      #  event_persona__start__lte=datetime.date.today()+timedelta(days=7))))
+    #Override get_queryset method (neede in class-based views)
+    def get_queryset(self):
+        #Fetch fresh data each time the view is accessed
+        return list(set(Persona.objects.filter(
+        event_persona__start__gt=datetime.date.today()-timedelta(days=5),
+        event_persona__start__lte=datetime.date.today()+timedelta(days=60))))
     # Remove duplicates from queryset_t1
     # If I split the queryset code, th persona is not shown even in localserver (undefined) when a new event is created
     # If it is done all at a once, like above, the above problem does not occur, but keeps over internet.
@@ -588,7 +596,7 @@ class PersonaListLimited(mixins.ListModelMixin,
 
     authentication_classes = (TokenAuthentication,)
 
-    # The decorator prevents teh persona column on event.component being empty when creting a new event.
+    # The decorator (do not) prevents the persona column on event.component being empty when creting a new event.
     # Without it, the column would only be filled (defined) if the gunicorn serve was restarted.
     @method_decorator(cache_control(no_cache=True, must_revalidate=True, no_store=True))
     def get(self, request, *args, **kwargs):
@@ -632,8 +640,18 @@ class EventList(mixins.ListModelMixin,
     #permission_classes =[IsSuperOrReadOnly, permissions.IsAuthenticatedOrReadOnly,]
     permission_classes =[permissions.IsAuthenticated,]
     authentication_classes = (TokenAuthentication,)
-
-    queryset = Event.objects.all()
+    
+    def get_queryset(self):
+        user_email = self.request.META.get('HTTP_CURRENTUSER')
+        #print('user_email',user_email)
+        kollege_with_email = (Kollege.objects.filter(email=user_email))
+        #print('qsKol', qsKol)
+        if (kollege_with_email):
+            queryset = Event.objects.filter(kollege_id=kollege_with_email[0])
+            return queryset
+        else:
+            queryset = Event.objects.all()
+            return queryset
 
     #queryset = Event.objects.order_by('start').filter(
     #    start__gte=datetime.date.today()-timedelta(days=1),
@@ -642,7 +660,7 @@ class EventList(mixins.ListModelMixin,
     serializer_class = EventSerializer
 
     def get(self, request, *args, **kwargs):
-        # print('user ', request.user)
+        #print('headers', request.META.get('HTTP_CURRENTUSER'))
         #print('Events filtered', Event.objects.order_by('start').filter(Q(start__gte=datetime.date.today()-timedelta(days=0)) & Q(start__lte=datetime.date.today()+timedelta(days=1))).values())
         return self.list(request, *args, **kwargs)
 
@@ -659,11 +677,28 @@ class EventListLimited(mixins.ListModelMixin,
     
     permission_classes =[permissions.IsAuthenticated,]
     authentication_classes = (TokenAuthentication,)
+#############
+    def get_queryset(self):
+        user_email = self.request.META.get('HTTP_CURRENTUSER')
+        #print('user_email',user_email)
+        kollege_with_email = (Kollege.objects.filter(email=user_email))
+        #print('qsKol', qsKol)
+        if (kollege_with_email):
+            queryset = Event.objects.filter(kollege_id=kollege_with_email[0]).filter(
+                start__gte=datetime.date.today()-timedelta(days=5),
+                start__lte=datetime.date.today()+timedelta(days=60)).exclude(color='#FFFFFF')
+            return queryset
+        else:
+            queryset = Event.objects.filter(
+            start__gte=datetime.date.today()-timedelta(days=1),
+            start__lte=datetime.date.today()+timedelta(days=7)).exclude(color='#FFFFFF')
+            return queryset
+
     #queryset = Event.objects.all()
     #queryset = Event.objects.order_by('start').filter(
-    queryset = Event.objects.filter(
-        start__gte=datetime.date.today()-timedelta(days=1),
-        start__lte=datetime.date.today()+timedelta(days=7)).exclude(color='#FFFFFF')
+#    queryset = Event.objects.filter(
+ #       start__gte=datetime.date.today()-timedelta(days=1),
+  #      start__lte=datetime.date.today()+timedelta(days=7)).exclude(color='#FFFFFF')
     
     serializer_class = EventSerializer
 

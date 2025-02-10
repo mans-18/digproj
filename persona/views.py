@@ -514,9 +514,9 @@ class PersonaList(mixins.ListModelMixin,
     # permission_classes = [permissions.IsAuthenticatedOrReadOnly,]
     # pylint: disable=no-member:
     
-    #queryset = Persona.objects.all()
-    def get_queryset(self):
-        return Persona.objects.all()
+    queryset = Persona.objects.all()
+    #def get_queryset(self):
+     #   return Persona.objects.all()
     #queryset = Persona.objects.filter(event_persona__gt=2000)
     # Lookup reverse from Persona into Event, by the event_persona related_name.
     # Then filter accordind to start field
@@ -573,11 +573,27 @@ class PersonaListLimited(mixins.ListModelMixin,
      #   event_persona__start__gt=datetime.date.today()-timedelta(days=1),
       #  event_persona__start__lte=datetime.date.today()+timedelta(days=7))))
     #Override get_queryset method (neede in class-based views)
+
     def get_queryset(self):
-        #Fetch fresh data each time the view is accessed
-        return list(set(Persona.objects.filter(
-        event_persona__start__gt=datetime.date.today()-timedelta(days=5),
-        event_persona__start__lte=datetime.date.today()+timedelta(days=60))))
+        user_email = self.request.META.get('HTTP_CURRENTUSER')
+        #print('user_email at personalistlimited',user_email)
+        kollege_with_email = (Kollege.objects.filter(email=user_email))
+        #print('qsKol at perLimited:', kollege_with_email)
+        if (kollege_with_email):
+            #Fetch fresh data each time the view is accessed
+            return list(set(Persona.objects.filter(
+            event_persona__start__gt=datetime.date.today()-timedelta(days=5),
+            event_persona__start__lte=datetime.date.today()+timedelta(days=60))))
+        else:
+            return list(set(Persona.objects.filter(
+            event_persona__start__gt=datetime.date.today()-timedelta(days=1),
+            event_persona__start__lte=datetime.date.today()+timedelta(days=7))))
+            #The below code caused persona to be displayed the amount of times it was associated to events
+            #along timeframe -5 +60. The list probobly eliminates duplicates.
+            #queryset = Persona.objects.all().filter(
+            #event_persona__start__gt=datetime.date.today()-timedelta(days=5),
+            #event_persona__start__lte=datetime.date.today()+timedelta(days=60))
+            #return queryset
     # Remove duplicates from queryset_t1
     # If I split the queryset code, th persona is not shown even in localserver (undefined) when a new event is created
     # If it is done all at a once, like above, the above problem does not occur, but keeps over internet.
@@ -647,7 +663,7 @@ class EventList(mixins.ListModelMixin,
         kollege_with_email = (Kollege.objects.filter(email=user_email))
         #print('qsKol', qsKol)
         if (kollege_with_email):
-            queryset = Event.objects.filter(kollege_id=kollege_with_email[0])
+            queryset = Event.objects.filter(kollege_id=kollege_with_email.first())
             return queryset
         else:
             queryset = Event.objects.all()
@@ -680,11 +696,11 @@ class EventListLimited(mixins.ListModelMixin,
 #############
     def get_queryset(self):
         user_email = self.request.META.get('HTTP_CURRENTUSER')
-        #print('user_email',user_email)
+        #print('self request at EventListLimited',self.request.META)
         kollege_with_email = (Kollege.objects.filter(email=user_email))
         #print('qsKol', qsKol)
         if (kollege_with_email):
-            queryset = Event.objects.filter(kollege_id=kollege_with_email[0]).filter(
+            queryset = Event.objects.filter(kollege_id=kollege_with_email.first()).filter(
                 start__gte=datetime.date.today()-timedelta(days=5),
                 start__lte=datetime.date.today()+timedelta(days=60)).exclude(color='#FFFFFF')
             return queryset
@@ -866,8 +882,47 @@ class EventReportList(mixins.ListModelMixin,
     permission_classes = [permissions.IsAuthenticated,]
     authentication_classes = (TokenAuthentication,)
     # pylint: disable=no-member
-    queryset = EventReport.objects.all()
+
+
+
+    def get_queryset(self):
+        '''
+        Get the currentuser as user_email from the request custom header set on getAuthHeaders() on api.service.ts;
+        Get the kolleges with the email "user_emaiL" (should be only one, except if duplicated);
+        If there is a kollege_with_email, return eventreport queryset limited to the reports of the events which kollege_id's are kollege_with_email;
+        If there is not a kollege_with_email, return an eventreport queryset of all reports limited to a period.
+        tips:
+        To keep consistency in querysets, kollege_with_email.first() better than index kollege_with_email[0];
+        Custom header must be stated on settings.py: CORS_ALLOW_HEADERS = list(default_headers) + ['CurrentUser',]
+
+        '''
+        user_email = self.request.META.get('HTTP_CURRENTUSER')
+        kollege_with_email = (Kollege.objects.all().filter(email=user_email))
+        #print('event__kol_id1', EventReport.objects.all().filter(event__kollege_id=kollege_with_email[0]))
+
+        if kollege_with_email.exists():
+            queryset = EventReport.objects.all().filter(event__kollege_id=kollege_with_email.first())            
+            return queryset
+
+        else:
+            queryset = EventReport.objects.all()
+            return queryset
+        
+    #queryset = EventReport.objects.all()
     serializer_class = EventReportSerializer
+
+    '''
+        elif kollege_with_email.exists():
+            queryset = EventReport.objects.all().filter(event__kollege_id=kollege_with_email.first())
+            return queryset
+    '''
+    '''
+        else:
+            queryset = EventReport.objects.all().filter(
+                event__start__gte=datetime.date.today()-timedelta(days=90),
+                event__start__lte=datetime.date.today()+timedelta(days=1)).exclude(event__color='#FFFFFF')
+            return queryset
+    '''
 
     def get(self, request, *args, **kwargs):
         if request.user.is_staff or request.user.is_partner:
@@ -877,6 +932,49 @@ class EventReportList(mixins.ListModelMixin,
     def post(self, request, *args, **kwargs):
         # print('user ', request.user)
         return self.create(request, *args, **kwargs)
+
+####################'''TODO'''##############################################
+class EventReportListLimited(mixins.ListModelMixin,
+                mixins.CreateModelMixin,
+                generics.GenericAPIView):
+    
+    permission_classes =[permissions.IsAuthenticated,]
+    authentication_classes = (TokenAuthentication,)
+#############
+    def get_queryset(self):
+        user_email = self.request.META.get('HTTP_CURRENTUSER')
+        #print('self request at EventListLimited',self.request.META)
+        kollege_with_email = (Kollege.objects.filter(email=user_email))
+        #print('qsKol', qsKol)
+        if (kollege_with_email):
+            queryset = EventReport.objects.filter(kollege_id=kollege_with_email[0]).filter(
+                event__start__gte=datetime.date.today()-timedelta(days=5),
+                event__start__lte=datetime.date.today()+timedelta(days=60)).exclude(color='#FFFFFF')
+            return queryset
+        else:
+            queryset = EventReport.objects.filter(
+            event__start__gte=datetime.date.today()-timedelta(days=1),
+            event__start__lte=datetime.date.today()+timedelta(days=7)).exclude(color='#FFFFFF')
+            return queryset
+
+    #queryset = Event.objects.all()
+    #queryset = Event.objects.order_by('start').filter(
+#    queryset = Event.objects.filter(
+ #       start__gte=datetime.date.today()-timedelta(days=1),
+  #      start__lte=datetime.date.today()+timedelta(days=7)).exclude(color='#FFFFFF')
+    
+    serializer_class = EventSerializer
+
+    def get(self, request, *args, **kwargs):
+        # print('user ', request.user)
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        # print('user ', request.user)
+        if (request.user.is_staff) & (not request.user.is_limited):
+            return self.create(request, *args, **kwargs)
+
+########################################################################
 
 
 class EventReportDetail(mixins.RetrieveModelMixin,

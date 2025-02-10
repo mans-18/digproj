@@ -9,13 +9,12 @@
 
 <h2>Esta é sua agenda de amanhã conosco:</h2>
 <ul>
-
     {% for kol in kollege_data %}
         {% for ev in event_data %}
 		{% if ev.color != '#FFFFFF' %}
                 <p>
                     {% if kol.id == ev.kollege_id %}
-                           Cliente: {{ev.persona_id}}<br>
+                           Cliente: {{ev.persona_id}}{{per_name}}<br>
                            Exame: {{ev.title}}<br>
 			   Data: {{ev.start}}
                     {% endif %}

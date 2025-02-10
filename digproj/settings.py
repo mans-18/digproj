@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 from decouple import config
-from dj_database_url import parse as dburl
+#from dj_database_url import parse as dburl
 from corsheaders.defaults import default_headers
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -22,9 +22,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 ALLOWED_HOSTS = [
     '52.44.41.170', #AWS Elastic IP 26-12-24 for instance digproj1224
-    '54.237.168.137' #AWS temp IP devDigproj1224
+    '3.230.207.81' #AWS Elastic IP devDigproj1224
     'digest.com.br',
     'api.digest.com.br',
+    'dev.digest.com.br',
     'localhost',
     '127.0.0.1',
 ]
@@ -89,29 +90,29 @@ DEFAULT_AUTO_FIELD='django.db.models.AutoField'
 
 WSGI_APPLICATION = 'digproj.wsgi.application'
 
+#DATABASES = {
+#    'default': {
+ #       'ENGINE': 'django.db.backends.postgresql',
+  #      'NAME': config('DATABASE_URL').split('/')[-1],
+   #     'USER': config('DATABASE_URL').split('//')[1].split(':')[0],
+    #    'PASSWORD': config('DATABASE_URL').split(':')[2].split('@')[0],
+     #   'HOST': config('DATABASE_URL').split('@')[1].split(':')[0],
+      #  'PORT': config('DATABASE_URL').split(':')[-1].split('/')[0],
+#        'CONN_MAX_AGE': 600,
+#    }
+#}
+
+############## For local DB, localhost ###########
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DATABASE_URL').split('/')[-1],
-        'USER': config('DATABASE_URL').split('//')[1].split(':')[0],
-        'PASSWORD': config('DATABASE_URL').split(':')[2].split('@')[0],
-        'HOST': config('DATABASE_URL').split('@')[1].split(':')[0],
-        'PORT': config('DATABASE_URL').split(':')[-1].split('/')[0],
-#        'CONN_MAX_AGE': 600,
-    }
+        'NAME': 'dig',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '5432',
+     }
 }
-
-############## For local DB, localhost ###########
-#DATABASES = {
-#    'default': {
-#       'ENGINE': 'django.db.backends.postgresql',
-#        'NAME': 'dig',
-#         'USER': '',
-#        'PASSWORD': '',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-#}
 ##################################################
 
 #SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"

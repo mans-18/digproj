@@ -82,7 +82,7 @@ class EventReportSerializer(serializers.ModelSerializer):
         fields = (#'reportUUID',
                 'id',
                 'im1', 'im2', 'im3', 'im4', 'im5', 'im6', 'im7', 'im8', 'im9', 'im10',
-                'drugs', 'anest', 'assistant', 'equipment', 'phar', 'esop', 'stom', 'duod',
+                'drugs', 'anest', 'assistant', 'equipment', 'indication', 'phar', 'esop', 'stom', 'duod',
                 'urease', 'biopsy', 'hystoResults', 'prep', 'quality', 'colo', 'genericDescription',
                 'conc1', 'conc2', 'conc3', 'conc4', 'conc5', 'conc6', 'complications', 'event')
         read_only_fields = ('id',)

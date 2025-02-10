@@ -221,6 +221,7 @@ class EventReport(models.Model):
     anest = models.CharField(null=True, max_length=255, blank=True)
     assistant = models.CharField(null=True, max_length=255, blank=True)
     equipment = models.CharField(null=True, max_length=255, blank=True)
+    indication = models.CharField(null=True, max_length=255, blank=True)
     phar = models.TextField(null=True, blank=True)
     esop = models.TextField(null=True, blank=True)
     stom = models.TextField(null=True, blank=True)

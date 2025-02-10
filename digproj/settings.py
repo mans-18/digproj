@@ -90,29 +90,29 @@ DEFAULT_AUTO_FIELD='django.db.models.AutoField'
 
 WSGI_APPLICATION = 'digproj.wsgi.application'
 
-#DATABASES = {
-#    'default': {
- #       'ENGINE': 'django.db.backends.postgresql',
-  #      'NAME': config('DATABASE_URL').split('/')[-1],
-   #     'USER': config('DATABASE_URL').split('//')[1].split(':')[0],
-    #    'PASSWORD': config('DATABASE_URL').split(':')[2].split('@')[0],
-     #   'HOST': config('DATABASE_URL').split('@')[1].split(':')[0],
-      #  'PORT': config('DATABASE_URL').split(':')[-1].split('/')[0],
-#        'CONN_MAX_AGE': 600,
-#    }
-#}
-
-############## For local DB, localhost ###########
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dig',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '5432',
-     }
+        'NAME': config('DATABASE_URL').split('/')[-1],
+        'USER': config('DATABASE_URL').split('//')[1].split(':')[0],
+        'PASSWORD': config('DATABASE_URL').split(':')[2].split('@')[0],
+        'HOST': config('DATABASE_URL').split('@')[1].split(':')[0],
+        'PORT': config('DATABASE_URL').split(':')[-1].split('/')[0],
+        'CONN_MAX_AGE': 600,
+    }
 }
+
+############## For local DB, localhost ###########
+#DATABASES = {
+ #   'default': {
+  #      'ENGINE': 'django.db.backends.postgresql',
+  #      'NAME': 'dig',
+   #     'USER': '',
+    #    'PASSWORD': '',
+   #     'HOST': 'localhost',
+  #      'PORT': '5432',
+ #    }
+#}
 ##################################################
 
 #SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"

@@ -97,7 +97,7 @@ class Partner(models.Model):
     class Meta:
         # unique_together = (('name', 'crm'),)
         ordering = ['name']
-        index_together = (('name', 'crm'),)
+        #index_together = (('name', 'crm'),)
 
 class Procedure(models.Model):
     """Procedures and values delivered"""
@@ -115,7 +115,7 @@ class Procedure(models.Model):
     class Meta:
         unique_together = (('name', 'code'),)
         ordering = ['name']
-        index_together = (('name', 'code'),)
+        #index_together = (('name', 'code'),)
 
 
 class Event(models.Model):
@@ -282,7 +282,7 @@ class Persona(models.Model):
     class Meta:
         ordering = ['name']
         unique_together = (('name', 'mobile'),)
-        index_together = (('name', 'mobile'),)
+        #index_together = (('name', 'mobile'),)
 
     def __str__(self):
         return self.name

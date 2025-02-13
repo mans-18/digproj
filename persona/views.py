@@ -101,11 +101,14 @@ class EmailKollege(mixins.ListModelMixin,
             start__date=datetime.date.today()+timedelta(days=1)).values()
             lqs = list(qs)
 
-            ps = Persona.objects.all().values()
+            ps = Persona.objects.filter(
+            event_persona__start__date=datetime.date.today()+timedelta(days=1)).values()
             lps = list(ps)
 
-            kl = Kollege.objects.all().values()
+            kl = Kollege.objects.filter(
+            event_kollege__start__date=datetime.date.today()+timedelta(days=1)).values()
             lkl = list(kl)
+            
            # print('This kl and  lkl',kl, lkl)
 
             ##### Shows a list of events from a single kollege ####
@@ -126,11 +129,11 @@ class EmailKollege(mixins.ListModelMixin,
                                         extra = koltotal['name']
             print('this extra', extra)
 
-            per_name = ''
-            for per in lps:
-                for ev in lqs:
-                    if per['id'] == ev['persona_id']:
-                        per_name = per['name'].title()
+#            per_name = ''
+ #           for per in lps:
+  #              for ev in lqs:
+   #                 if per['id'] == ev['persona_id']:
+    #                    per_name = per['name'].title()
 
 #            for kol in lkl:
  #                for ev in lqs:
@@ -157,7 +160,7 @@ class EmailKollege(mixins.ListModelMixin,
             #         if item['id'] == ev['persona_id']:
             #             mailList_p.append(item)
 
-            msg_html = render_to_string('email2.html', {'event_data':eventList, 'persona_data':lps, 'per_name':per_name,
+            msg_html = render_to_string('email2.html', {'event_data':eventList, 'persona_data':lps, #'per_name':per_name,
                                         'kollege_data':lkl, 'extra': extra, 'toEmailCount':toEmailCount})
             # return send_mail('Digest Agenda',
             #     msg_html,

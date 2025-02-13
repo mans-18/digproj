@@ -9,18 +9,22 @@
 
 <h2>Esta é sua agenda de amanhã conosco:</h2>
 <ul>
+    {% for per in persona_data %}
+    {% for ev in event_data %}
+    {% if per.id == ev.persona_id %}
     {% for kol in kollege_data %}
-        {% for ev in event_data %}
+    {% if kol.id == ev.kollege_id %}
 		{% if ev.color != '#FFFFFF' %}
                 <p>
-                    {% if kol.id == ev.kollege_id %}
-                           Cliente: {{ev.persona_id}}{{per_name}}<br>
-                           Exame: {{ev.title}}<br>
-			   Data: {{ev.start}}
-                    {% endif %}
+                        Cliente: {{ev.persona_id}}{{per.name}}<br>
+                        Exame: {{ev.title}}<br>
+			            Data: {{ev.start}}
                 </p>
 		{% endif %}
-        {% endfor %}
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+    {% endfor %}
     {% endfor %}
 </ul>
 {% endif %}

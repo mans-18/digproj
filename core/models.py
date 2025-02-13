@@ -77,7 +77,6 @@ class Kollege(models.Model):
     class Meta:
         # unique_together = (('name', 'crm'),)
         ordering = ['name']
-        #index_together = (('name', 'crm'),)
 
 class Partner(models.Model):
     """Doctor or Clinics the persona comes from"""
@@ -97,7 +96,6 @@ class Partner(models.Model):
     class Meta:
         # unique_together = (('name', 'crm'),)
         ordering = ['name']
-        #index_together = (('name', 'crm'),)
 
 class Procedure(models.Model):
     """Procedures and values delivered"""
@@ -115,8 +113,6 @@ class Procedure(models.Model):
     class Meta:
         unique_together = (('name', 'code'),)
         ordering = ['name']
-        #index_together = (('name', 'code'),)
-
 
 class Event(models.Model):
     """Event to occur to a persona = 19 fields + ID"""
@@ -282,7 +278,6 @@ class Persona(models.Model):
     class Meta:
         ordering = ['name']
         unique_together = (('name', 'mobile'),)
-        #index_together = (('name', 'mobile'),)
 
     def __str__(self):
         return self.name

@@ -77,7 +77,7 @@ class Kollege(models.Model):
     class Meta:
         # unique_together = (('name', 'crm'),)
         ordering = ['name']
-        index_together = (('name', 'crm'),)
+        #index_together = (('name', 'crm'),)
 
 class Partner(models.Model):
     """Doctor or Clinics the persona comes from"""

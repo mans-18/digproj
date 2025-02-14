@@ -589,8 +589,8 @@ class PersonaListLimited(mixins.ListModelMixin,
             event_persona__start__lte=datetime.date.today()+timedelta(days=60))))
         else:
             return list(set(Persona.objects.filter(
-            event_persona__start__gt=datetime.date.today()-timedelta(days=1),
-            event_persona__start__lte=datetime.date.today()+timedelta(days=7))))
+            event_persona__start__gt=datetime.date.today()-timedelta(days=90),
+            event_persona__start__lte=datetime.date.today()+timedelta(days=60))))
             #The below code caused persona to be displayed the amount of times it was associated to events
             #along timeframe -5 +60. The list probobly eliminates duplicates.
             #queryset = Persona.objects.all().filter(

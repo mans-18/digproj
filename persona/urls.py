@@ -26,6 +26,9 @@ urlpatterns =[
             views.PersonaListLimited.as_view(),
             name='persona-list-limited'),
 ###########################################
+      path('eventsByDateRange/',
+           views.EventsByDateRange.as_view(),
+           name='events-by-date-range'),
       path('events/<int:pk>/',
             views.EventDetail.as_view(),
             name='event-detail'),

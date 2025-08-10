@@ -78,9 +78,11 @@ class EmailKollege(mixins.ListModelMixin,
             #     data[title].append(start)
             print(request)
             print(request.body)
-            print(request.body.decode())
+            print(request.body.decode()) #decode() produces a string
+            print(json.loads(request.body.decode())[0]['name']) #this gives me the name of the kol
 
             toEmail = ['digest.principal@gmail.com',]
+            #reqKolId = json.loads(request.body.decode())[0]['name']
             kolIds = []
             # Decodes the bytes obj to a str, and parses it to a json dict
             # "multiple" at the dashboard html delivers a dictionary. Without it, delivers a list of keys
@@ -95,21 +97,25 @@ class EmailKollege(mixins.ListModelMixin,
             print('request body count', len(request.body.decode()))
             print('toEmail count', len(toEmail))
             toEmailCount = len(toEmail)
-            #print('toEmail', toEmail)
+            print('toEmail', toEmail)
 
             qs = Event.objects.order_by('start').filter(
             start__date=datetime.date.today()+timedelta(days=1)).values()
             lqs = list(qs)
 
-            ps = Persona.objects.filter(
-            event_persona__start__date=datetime.date.today()+timedelta(days=1)).values()
+            ps = Persona.objects.all()
             lps = list(ps)
 
-            kl = Kollege.objects.filter(
-            event_kollege__start__date=datetime.date.today()+timedelta(days=1)).values()
-            lkl = list(kl)
+            #ps = Persona.objects.filter(
+            #event_persona__start__date=datetime.date.today()+timedelta(days=1)).values()
+            #lps = list(ps)
+
+
+    #        kl = Kollege.objects.filter(
+     #       event_kollege__start__date=datetime.date.today()+timedelta(days=1)).values()
+      #      lkl = list(kl)
             
-           # print('This kl and  lkl',kl, lkl)
+            #print('This kl and  lkl',kl, lkl)
 
             ##### Shows a list of events from a single kollege ####
             eventList = []
@@ -118,15 +124,17 @@ class EmailKollege(mixins.ListModelMixin,
                     eventList.append(ev)
             #print('eventList', eventList)
 
-            extra = ''
-            for koltotal in lkl:
-                for kol in kolIds:
+            extra = json.loads(request.body.decode())[0]['name'] #''
+    #        for koltotal in lkl:
+     #           for kol in kolIds:
                     #for ev in lqs:
                         #for pers in lps:
                            # if kol == ev['kollege_id']:
                                 #if pers['id'] == ev['persona_id']:
-                                    if koltotal['id'] == kol:
-                                        extra = koltotal['name']
+                                    #print('koltotal>lkl', lkl, koltotal)
+      #                              if koltotal['id'] == kol:
+                                        #print('koltotal>lkl', lkl, koltotal)
+       #                                 extra = koltotal['name']
             print('this extra', extra)
 
 #            per_name = ''
@@ -160,8 +168,10 @@ class EmailKollege(mixins.ListModelMixin,
             #         if item['id'] == ev['persona_id']:
             #             mailList_p.append(item)
 
-            msg_html = render_to_string('email2.html', {'event_data':eventList, 'persona_data':lps, #'per_name':per_name,
-                                        'kollege_data':lkl, 'extra': extra, 'toEmailCount':toEmailCount})
+            #14-4-25 lqs filtered at the template. No need to filter here? (perhaps better here). Testing only
+            #msg_html = render_to_string('email2.html', {'event_data':eventList, 'persona_data':lps, #'per_name':per_name,
+            msg_html = render_to_string('email2.html', {'event_data':lqs, 'persona_data':lps, #'per_name':per_name,
+                                        'kollege_data':json.loads(request.body.decode())[0]['id'], 'extra': extra, 'toEmailCount':toEmailCount})
             # return send_mail('Digest Agenda',
             #     msg_html,
             #     'miguel.sza@gmail.com',
@@ -203,7 +213,7 @@ class EmailFromSite(mixins.ListModelMixin,
         mobile = req['mobile']
         email = req['email']
         body = req['body']
-        emailTxt = name + mobile + email + body
+        #emailTxt = name + mobile + email + body
         #print(emailTxt)
         #return emailTxt
         return req
@@ -213,7 +223,7 @@ class EmailFromSite(mixins.ListModelMixin,
 
     # @xframe_options_exempt
     def emailFromSite(self, request, *args, **kwargs):
-            toEmail = ['miguel.sza@gmail.com', 'contato@digest.com.br']
+            toEmail = ['miguel.sza@gmail.com', 'digest.principal@gmail.com', 'contato@digest.com.br',]
             #print(request.body.decode())
             req = json.loads(request.body.decode())
             #print('req', req)
@@ -337,7 +347,10 @@ class KollegeList(mixins.ListModelMixin,
 
     # If active, auth is done with token sent in the header (by ModHeader) and actions are activated
     authentication_classes = (TokenAuthentication,)
-    
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['name', 'crm']
+
     # def email_kollege(self, request):
     #     # id = request.POST.get('id')
     #     # id = request.PUT.get('id')
@@ -585,12 +598,12 @@ class PersonaListLimited(mixins.ListModelMixin,
         if (kollege_with_email):
             #Fetch fresh data each time the view is accessed
             return list(set(Persona.objects.filter(
-            event_persona__start__gt=datetime.date.today()-timedelta(days=5),
-            event_persona__start__lte=datetime.date.today()+timedelta(days=60))))
+            event_persona__start__gt=datetime.date.today()-timedelta(days=30),
+            event_persona__start__lte=datetime.date.today()+timedelta(days=30))))
         else:
             return list(set(Persona.objects.filter(
-            event_persona__start__gt=datetime.date.today()-timedelta(days=90),
-            event_persona__start__lte=datetime.date.today()+timedelta(days=60))))
+            event_persona__start__gt=datetime.date.today()-timedelta(days=180),
+            event_persona__start__lte=datetime.date.today()+timedelta(days=180))))
             #The below code caused persona to be displayed the amount of times it was associated to events
             #along timeframe -5 +60. The list probobly eliminates duplicates.
             #queryset = Persona.objects.all().filter(
@@ -705,12 +718,12 @@ class EventListLimited(mixins.ListModelMixin,
         if (kollege_with_email):
             queryset = Event.objects.filter(kollege_id=kollege_with_email.first()).filter(
                 start__gte=datetime.date.today()-timedelta(days=5),
-                start__lte=datetime.date.today()+timedelta(days=60)).exclude(color='#FFFFFF')
+                start__lte=datetime.date.today()+timedelta(days=60)).exclude(status='cancelado')
             return queryset
         else:
             queryset = Event.objects.filter(
             start__gte=datetime.date.today()-timedelta(days=1),
-            start__lte=datetime.date.today()+timedelta(days=7)).exclude(color='#FFFFFF')
+            start__lte=datetime.date.today()+timedelta(days=7)).exclude(status='cancelado')
             return queryset
 
     #queryset = Event.objects.all()
@@ -731,6 +744,53 @@ class EventListLimited(mixins.ListModelMixin,
             return self.create(request, *args, **kwargs)
 
 ########################################################################
+
+
+class EventsByDateRange(mixins.ListModelMixin,
+                mixins.CreateModelMixin,
+                generics.GenericAPIView):
+    
+    permission_classes =[permissions.IsAuthenticated,]
+    authentication_classes = (TokenAuthentication,)
+#############
+    def get_queryset(self):
+        user_email = self.request.META.get('HTTP_CURRENTUSER')
+        #print('self request at EventListLimited',self.request.META)
+        kollege_with_email = (Kollege.objects.filter(email=user_email))
+        #print('qsKol', qsKol)
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        if (kollege_with_email):
+            format_str = '%d-%m-%Y'
+            queryset = Event.objects.filter(kollege_id=kollege_with_email.first()).filter(
+                start__gte = datetime.datetime.strptime(start_date, format_str),
+                start__lte=datetime.datetime.strptime(end_date, format_str)).exclude(status='cancelado')
+            return queryset
+        else:
+            format_str = '%d-%m-%Y'
+            queryset = Event.objects.filter(
+                start__gte = datetime.datetime.strptime(start_date, format_str),
+                start__lte=datetime.datetime.strptime(end_date, format_str)).exclude(status='cancelado')
+            return queryset
+
+    #queryset = Event.objects.all()
+    #queryset = Event.objects.order_by('start').filter(
+#    queryset = Event.objects.filter(
+ #       start__gte=datetime.date.today()-timedelta(days=1),
+  #      start__lte=datetime.date.today()+timedelta(days=7)).exclude(color='#FFFFFF')
+    
+    serializer_class = EventSerializer
+
+    def get(self, request, *args, **kwargs):
+        # print('user ', request.user)
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        # print('user ', request.user)
+        if (request.user.is_staff) & (not request.user.is_limited):
+            return self.create(request, *args, **kwargs)
+
 
 class EventDetail(mixins.RetrieveModelMixin,
                   mixins.UpdateModelMixin,

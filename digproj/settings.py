@@ -103,16 +103,16 @@ DATABASES = {
 }
 
 ############## For local DB, localhost ###########
-#DATABASES = {
- #   'default': {
-  #      'ENGINE': 'django.db.backends.postgresql',
-  #      'NAME': 'dig',
-   #     'USER': '',
-    #    'PASSWORD': '',
-   #     'HOST': 'localhost',
-  #      'PORT': '5432',
- #    }
-#}
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'dig_060825',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '5432',
+     }
+}
 ##################################################
 
 #SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
@@ -186,6 +186,14 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     }
 }
+
+# FROM CHATGPT: 
+# ERROR: dashboard.component.ts:159 ERROR RuntimeError:
+# NG0900: Error trying to diff '[object Object]'. Only arrays and iterables are allowed
+#REST_FRAMEWORK = {
+#    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+#    'PAGE_SIZE': 50,
+#}
 
 #AWS_ACCESS_KEY_ID = config('your-access-key-id')
 #AWS_SECRET_ACCESS_KEY = config('your-secret-access-key')

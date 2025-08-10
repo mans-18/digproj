@@ -58,15 +58,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Kollege(models.Model):
     """Equipe to be used for a Persona"""
     # Kollege (4)
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     #Instead of referencing User directly, set the 1st arg (model) by settings
     # user = models.ForeignKey(
     #    settings.AUTH_USER_MODEL,
     #    on_delete=models.CASCADE
     # )
-    crm = models.CharField(null=True, max_length=15, blank=True)
+    crm = models.CharField(max_length=15, unique=True)
     email = models.EmailField(null=True, blank=True)
-    mobile = models.CharField(max_length=20, blank=True)
+    mobile = models.CharField(null=True, max_length=20, blank=True)
     agenda = models.TextField(null=True, blank=True)
     genericChar = models.CharField(null=True, max_length=255, blank=True)
 

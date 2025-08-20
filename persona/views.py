@@ -22,10 +22,30 @@ import argparse
 
 # from django.views.decorators.clickjacking import xframe_options_exempt
 
-import django_filters.rest_framework
+#import django_filters.rest_framework
 from django_filters.rest_framework import DjangoFilterBackend
 from django.template.loader import render_to_string
 from django.db.models import Q
+
+
+'''From ChatGPT 10-08025'''
+
+import io
+import boto3
+from django.conf import settings
+from django.core.files.base import ContentFile
+from rest_framework.decorators import api_view, parser_classes, permission_classes
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+
+from core.models import Event, EventReport, EventReportImage
+from .serializers import EventReportImageSerializer, EventReportSerializer
+from .pdf_builder import build_eventreport_pdf  # we'll create this next
+#from .utils import populate_eventreport_im_fields  # optional
+
 
 from persona.serializers import (UserSerializer,
                                  KollegeSerializer,
@@ -38,13 +58,13 @@ from persona.serializers import (UserSerializer,
                                  EmailFromSiteSerializer)
 
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import Http404, HttpRequest, HttpResponse
+#from django.http import Http404, HttpRequest, HttpResponse
 
 from collections import defaultdict
 
 from core.models import User, Kollege, Event, Persona, GenericGroup, EventReport, Partner, Procedure
 
-from persona import serializers
+#from persona import serializers
 
 
 @api_view(['GET'])
@@ -58,6 +78,126 @@ def api_root(request, format=None):
         'partners': reverse('partner-list', request=request, format=format),
         'eventreports': reverse('eventreport-list', request=request, format=format),
     })
+
+    ############################################
+    ''' From ChatGPT 10-08-25'''
+
+@api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser])
+@permission_classes([IsAuthenticated])
+def upload_images_view(request):
+    """
+    Accepts multiple files with key 'images' and required event_id.
+    Optionally include report_id to attach to an existing report.
+    Returns list of created EventReportImage objects (serialized).
+    """
+    event_id = request.data.get('event_id')
+    report_id = request.data.get('report_id')
+    if not event_id:
+        return Response({"detail": "event_id required"}, status=status.HTTP_400_BAD_REQUEST)
+    event = get_object_or_404(Event, id=event_id)
+    report = None
+    if report_id:
+        report = get_object_or_404(EventReport, id=report_id)
+
+    created = []
+    for f in request.FILES.getlist('images'):
+        eri = EventReportImage.objects.create(event=event, report=report, image_file=f, caption=f.name)
+        created.append(eri)
+
+    serializer = EventReportImageSerializer(created, many=True, context={'request': request})
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
+@permission_classes([IsAuthenticated])
+def create_report_view(request):
+    """
+    Creates an EventReport for a given event (or uses existing report_id),
+    attaches images (either by ids provided in image_ids or images uploaded in the same request),
+    builds PDF using ReportLab, saves pdf_file to EventReport.pdf (if you add such a field) or returns presigned URL.
+    """
+    event_id = request.data.get('event_id')
+    if not event_id:
+        return Response({"detail": "event_id required"}, status=status.HTTP_400_BAD_REQUEST)
+    event = get_object_or_404(Event, id=event_id)
+
+    # Use provided report_id or create a new EventReport
+    report_id = request.data.get('report_id')
+    if report_id:
+        report = get_object_or_404(EventReport, id=report_id)
+    else:
+        # create with any provided fields that match your EventReport
+        report_data = {}
+        # e.g. set assistant, drugs, etc if provided in request.data
+        for field in ['assistant', 'drugs', 'anest', 'equipment', 'indication', 'phar', 'esop']:
+            if request.data.get(field) is not None:
+                report_data[field] = request.data.get(field)
+        report = EventReport.objects.create(event=event, **report_data)
+
+    # Attach images by ids
+    image_ids = request.data.get('image_ids')
+    attached_images = []
+    if image_ids:
+        # image_ids may be JSON string
+        import json
+        if isinstance(image_ids, str):
+            image_ids = json.loads(image_ids)
+        imgs = EventReportImage.objects.filter(id__in=image_ids, event=event)
+        imgs.update(report=report)
+        attached_images.extend(imgs)
+
+    # Also accept files in same request
+    for f in request.FILES.getlist('images'):
+        eri = EventReportImage.objects.create(event=event, report=report, image_file=f, caption=f.name)
+        attached_images.append(eri)
+
+    # Optionally populate im1..im10 on EventReport for backward compatibility
+    if attached_images:
+        urls = [request.build_absolute_uri(i.image_file.url) for i in attached_images]
+        try:
+            None #populate_eventreport_im_fields(report, urls)
+        except Exception:
+            pass
+
+    # Build PDF bytes using ReportLab builder (see next)
+    pdf_bytes = build_eventreport_pdf(report=report, event=event, images=attached_images, title=f"Report - {event.title}")
+
+    # Save the PDF to S3. You might want to add a pdf_file field to EventReport; if not, you can upload directly with boto3.
+    # Option A: Save to an EventReport.pdf_file FileField (recommended)
+    try:
+        # if your EventReport has a FileField named 'pdf_file'
+        report.pdf_file.save(f"eventreport_{report.id}.pdf", ContentFile(pdf_bytes))
+        report.save()
+        pdf_s3_key = report.pdf_file.name
+    except Exception:
+        # Option B: direct upload to S3 using boto3
+        s3 = boto3.client('s3',
+                          aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                          aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                          region_name=getattr(settings, 'AWS_S3_REGION_NAME', None))
+        filename = f"reports/event_{event.id}/report_{report.id}.pdf"
+        s3.upload_fileobj(io.BytesIO(pdf_bytes), settings.AWS_STORAGE_BUCKET_NAME, filename, ExtraArgs={'ContentType': 'application/pdf', 'ACL': 'private'})
+        pdf_s3_key = filename
+
+    # Generate presigned URL
+    s3 = boto3.client('s3',
+                      aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                      region_name=getattr(settings, 'AWS_S3_REGION_NAME', None))
+    presigned = s3.generate_presigned_url('get_object',
+                                          Params={'Bucket': settings.AWS_STORAGE_BUCKET_NAME, 'Key': pdf_s3_key},
+                                          ExpiresIn=3600)
+
+    return Response({
+        'report_id': report.id,
+        'pdf_s3_key': pdf_s3_key,
+        'download_url': presigned
+    }, status=status.HTTP_201_CREATED)
+
+
+
 
 class EmailKollege(mixins.ListModelMixin,
                    mixins.CreateModelMixin,
@@ -717,13 +857,13 @@ class EventListLimited(mixins.ListModelMixin,
         #print('qsKol', qsKol)
         if (kollege_with_email):
             queryset = Event.objects.filter(kollege_id=kollege_with_email.first()).filter(
-                start__gte=datetime.date.today()-timedelta(days=5),
+                start__gte=datetime.date.today()-timedelta(days=1),
                 start__lte=datetime.date.today()+timedelta(days=60)).exclude(status='cancelado')
             return queryset
         else:
             queryset = Event.objects.filter(
-            start__gte=datetime.date.today()-timedelta(days=1),
-            start__lte=datetime.date.today()+timedelta(days=7)).exclude(status='cancelado')
+            start__gte=datetime.date.today()-timedelta(days=7),
+            start__lte=datetime.date.today()+timedelta(days=60)).exclude(status='cancelado')
             return queryset
 
     #queryset = Event.objects.all()
@@ -762,13 +902,13 @@ class EventsByDateRange(mixins.ListModelMixin,
         end_date = self.request.query_params.get('end_date')
 
         if (kollege_with_email):
-            format_str = '%d-%m-%Y'
+            format_str = '%d/%m/%Y'
             queryset = Event.objects.filter(kollege_id=kollege_with_email.first()).filter(
                 start__gte = datetime.datetime.strptime(start_date, format_str),
                 start__lte=datetime.datetime.strptime(end_date, format_str)).exclude(status='cancelado')
             return queryset
         else:
-            format_str = '%d-%m-%Y'
+            format_str = '%d/%m/%Y'
             queryset = Event.objects.filter(
                 start__gte = datetime.datetime.strptime(start_date, format_str),
                 start__lte=datetime.datetime.strptime(end_date, format_str)).exclude(status='cancelado')
@@ -804,8 +944,24 @@ class EventDetail(mixins.RetrieveModelMixin,
     permission_classes =[permissions.IsAuthenticated,]
     authentication_classes = (TokenAuthentication,)
 
-    ############################################
-    '''
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        #self.read_camera_capture(0)
+        if (request.user.is_staff) & (not request.user.is_limited):
+            return self.update(request, *args, **kwargs)
+    
+    def patch(self, request, *args, **kwargs):
+        #self.read_camera_capture(0)
+        if (request.user.is_staff) & (not request.user.is_limited):
+            return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        if request.user.is_superuser:
+            return self.destroy(request, *args, **kwargs)
+
+'''
     def read_camera_capture(self, index_camera):
         # Import the required packages
         print(index_camera)
@@ -873,24 +1029,7 @@ class EventDetail(mixins.RetrieveModelMixin,
         capture.release()
         cv2.destroyAllWindows()
     '''
-    ####################################################
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        #self.read_camera_capture(0)
-        if (request.user.is_staff) & (not request.user.is_limited):
-            return self.update(request, *args, **kwargs)
-    
-    def patch(self, request, *args, **kwargs):
-        #self.read_camera_capture(0)
-        if (request.user.is_staff) & (not request.user.is_limited):
-            return self.update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        if request.user.is_superuser:
-            return self.destroy(request, *args, **kwargs)
 
 class GenericGroupList(mixins.ListModelMixin,
                        mixins.CreateModelMixin,

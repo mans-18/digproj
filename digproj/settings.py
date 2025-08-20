@@ -106,7 +106,7 @@ DATABASES = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dig_060825',
+        'NAME': 'dig180825',
         'USER': '',
         'PASSWORD': '',
         'HOST': 'localhost',
@@ -160,7 +160,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = False
+USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
@@ -178,6 +178,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Compress static files for serving
 # https://warehouse.python.org/project/whitenoise
+'''
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -186,6 +187,7 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     }
 }
+'''
 
 # FROM CHATGPT: 
 # ERROR: dashboard.component.ts:159 ERROR RuntimeError:
@@ -199,6 +201,16 @@ STORAGES = {
 #AWS_SECRET_ACCESS_KEY = config('your-secret-access-key')
 #AWS_STORAGE_BUCKET_NAME = config('your-bucket-name')
 #AWS_S3_REGION_NAME = config('your-region')  # e.g., 'us-east-1'
+
+""" ChatGPT 10-08-2025"""
+
+INSTALLED_APPS += ['storages']
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID') #"AKIA2LGBBDMAZ7VZSG4F" #os.environ['AWS_ACCESS_KEY_ID']
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME') # os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
+AWS_QUERYSTRING_AUTH = True   # generate signed URLs
 
 """Added 22-12-25"""
 

@@ -1,6 +1,6 @@
 # pylint: disable=import-error
 from rest_framework import serializers
-from core.models import User, Kollege, Event, Persona, EventReport, Partner, Procedure, GenericGroup, EmailFromSite
+from core.models import User, Kollege, Event, Persona, EventReport, EventReportImage, Partner, Procedure, GenericGroup, EmailFromSite
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for User objects"""
@@ -83,13 +83,26 @@ class EventSerializer(serializers.ModelSerializer):
                   'genericNumber2', 'genericNumber3', 'persona', 'kollege', 'persona_id', 'kollege_id')
         read_only_fields = ('id',)
 
+######## FRom ChatGPT 10-08-25 ####################
+class EventReportImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventReportImage
+        fields = ['id', 'event', 'report', 'image_file', 'caption', 'uploaded_at']
+
+class EventReportSerializer(serializers.ModelSerializer):
+    images = EventReportImageSerializer(many=True, read_only=True)
+    class Meta:
+        model = EventReport
+        fields = '__all__'
+#####################################################
+
 class EventReportSerializer(serializers.ModelSerializer):
     """Serializer  for EventReport - 34 fields"""
 
     class Meta:
         model = EventReport
         fields = (#'reportUUID',
-                'id',
+                'id', 'pdf_file',
                 'im1', 'im2', 'im3', 'im4', 'im5', 'im6', 'im7', 'im8', 'im9', 'im10',
                 'drugs', 'anest', 'assistant', 'equipment', 'indication', 'phar', 'esop', 'stom', 'duod',
                 'urease', 'biopsy', 'hystoResults', 'prep', 'quality', 'colo', 'genericDescription',

@@ -25,6 +25,9 @@ urlpatterns =[
       path('personas-limited/',
             views.PersonaListLimited.as_view(),
             name='persona-list-limited'),
+      path('eventsByDateRange/',
+           views.EventsByDateRange.as_view(),
+           name='events-by-date-range'),
 ###########################################
       path('events/<int:pk>/',
             views.EventDetail.as_view(),
@@ -71,6 +74,8 @@ urlpatterns =[
       path('eventreports/<int:pk>/',
             views.EventReportDetail.as_view(),
             name='eventreport-detail'),
+      path('uploads/images/',
+           views.upload_images_view),
 #     path('upload-pdf/',
  #           PDFUploadView.as_view(),
   #          name='pdf-upload'),

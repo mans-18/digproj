@@ -34,7 +34,7 @@ class KollegeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Kollege
-        fields = ('id', 'name', 'crm', 'email', 'mobile')
+        fields = ('id', 'name', 'crm', 'email', 'mobile', 'agenda', 'genericChar')
         read_only_fields = ('id',)
 
 class PartnerSerializer(serializers.ModelSerializer):
@@ -42,7 +42,7 @@ class PartnerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Partner
-        fields = ('id', 'name', 'crm', 'email', 'mobile', 'whatsapp', 'telephone')
+        fields = ('id', 'name', 'crm', 'email', 'mobile', 'whatsapp', 'telephone', 'genericChar')
         read_only_fields = ('id',)
 
 class ProcedureSerializer(serializers.ModelSerializer):
@@ -55,13 +55,17 @@ class ProcedureSerializer(serializers.ModelSerializer):
 
 class EventSerializer(serializers.ModelSerializer):
     """ Serializer for event objects - 20 fields"""
-# No effect
-#    persona = PersonaSerializer(many=True, read_only=True)
-#    kollege = KollegeSerializer(many=True, read_only=True)
-#    persona = serializers.PrimaryKeyRelatedField(
- #       many=True,
-    #    queryset=Persona.objects.all()
-  #     )
+    """4-8-25 From ChatGPT. Fix for type unmatch in Angular after nested serializer"""
+    persona = PersonaSerializer(read_only=True)
+    kollege = KollegeSerializer(read_only=True)
+    
+
+    persona_id = serializers.PrimaryKeyRelatedField(
+	queryset=Persona.objects.all(), write_only=True, source='persona'
+	)
+    kollege_id = serializers.PrimaryKeyRelatedField(
+        queryset=Kollege.objects.all(), write_only=True, source='kollege'
+	)
 
     class Meta:
         model = Event
@@ -71,7 +75,7 @@ class EventSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'partner', 'start', 'color', 'status', 'insurance', 'resourceId',
                   'addtitle1', 'addtitle2', 'addtitle3', 'comment', 'genericChar1',
                   'genericChar2', 'genericChar3', 'genericTime1', 'genericNumber1',
-                  'genericNumber2', 'genericNumber3', 'persona', 'kollege')
+                  'genericNumber2', 'genericNumber3', 'persona', 'kollege', 'persona_id', 'kollege_id')
         read_only_fields = ('id',)
 
 class EventReportSerializer(serializers.ModelSerializer):

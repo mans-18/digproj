@@ -58,7 +58,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Kollege(models.Model):
     """Equipe to be used for a Persona"""
     # Kollege (4)
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     #Instead of referencing User directly, set the 1st arg (model) by settings
     # user = models.ForeignKey(
     #    settings.AUTH_USER_MODEL,
@@ -66,7 +66,7 @@ class Kollege(models.Model):
     # )
     crm = models.CharField(null=True, max_length=15, blank=True)
     email = models.EmailField(null=True, blank=True)
-    mobile = models.CharField(max_length=20, blank=True)
+    mobile = models.CharField(null=True, max_length=20, blank=True)
     agenda = models.TextField(null=True, blank=True)
     genericChar = models.CharField(null=True, max_length=255, blank=True)
 
@@ -183,7 +183,10 @@ class EventReport(models.Model):
         time = strftime('%Y/%m/%d/')
         picurl =  time + arg2 + '/' + arg1
         return picurl
-    
+
+    #### From ChatGPT 10-08-25 ###############
+    pdf_file = models.FileField(upload_to='reports/%Y/%m/%d/pdfs/', null=True, blank=True)
+
     # Images (10)
     # https://www.geeksforgeeks.org/imagefield-django-models/
     #im1 = models.ImageField(upload_to ='uploads/% Y/% m/% d/')
@@ -252,6 +255,19 @@ class EventReport(models.Model):
     class Meta:
         ordering = ['id', 'assistant',]
 
+class EventReportImage(models.Model):
+    """
+    Stores each captured image and links it to an Event and optionally to an EventReport.
+    File stored via your DEFAULT_FILE_STORAGE (django-storages -> S3).
+    """
+    event = models.ForeignKey('Event', on_delete=models.CASCADE, related_name='images', null=True, blank=True)
+    #report = models.ForeignKey('EventReport', on_delete=models.CASCADE, related_name='images', null=True, blank=True)
+    image_file = models.ImageField(upload_to='events/%Y/%m/%d/images/')
+    caption = models.CharField(max_length=255, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Image {self.pk} for event {self.event_id}"
 
 class Persona(models.Model):
     """Persona model"""
@@ -269,7 +285,7 @@ class Persona(models.Model):
     complement = models.CharField(null=True, max_length=100, blank=True)
     postalcode = models.CharField(null=True, max_length=20, blank=True)
     dob = models.DateField(null=True, blank=True)
-    registerdate = models.DateTimeField(null=True, blank=True)
+    registerdate = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     #registerdate = models.DateTimeField(null=True, default=timezone.now)
     comment = models.CharField(null=True, max_length=255, blank=True)
     #kollegen = models.ManyToManyField('Kollege')

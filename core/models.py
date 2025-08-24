@@ -64,7 +64,7 @@ class Kollege(models.Model):
     #    settings.AUTH_USER_MODEL,
     #    on_delete=models.CASCADE
     # )
-    crm = models.CharField(null=True, max_length=15, blank=True)
+    crm = models.CharField(max_length=15, unique=True, default=0)
     email = models.EmailField(null=True, blank=True)
     mobile = models.CharField(null=True, max_length=20, blank=True)
     agenda = models.TextField(null=True, blank=True)
@@ -156,7 +156,8 @@ class Event(models.Model):
      #                               on_delete=models.CASCADE)
 
     def __str__(self):
-        name = self.start.strftime('%x'+' %X') + ' ' + self.title
+        #name = self.start.strftime('%x'+' %X') + ' ' + self.title
+        name = f"{self.title} at {self.start.astimezone()}"
         return name
 
     class Meta:
@@ -183,7 +184,7 @@ class EventReport(models.Model):
         time = strftime('%Y/%m/%d/')
         picurl =  time + arg2 + '/' + arg1
         return picurl
-
+    
     #### From ChatGPT 10-08-25 ###############
     pdf_file = models.FileField(upload_to='reports/%Y/%m/%d/pdfs/', null=True, blank=True)
 

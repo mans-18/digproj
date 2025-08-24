@@ -41,8 +41,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 
-from core.models import Event, EventReport
-from .serializers import EventReportSerializer
+from core.models import Event, EventReport, EventReportImage
+from .serializers import EventReportImageSerializer, EventReportSerializer
 from .pdf_builder import build_eventreport_pdf  # we'll create this next
 #from .utils import populate_eventreport_im_fields  # optional
 

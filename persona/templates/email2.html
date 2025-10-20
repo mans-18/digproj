@@ -4,29 +4,27 @@
 
 {% if extra %}
 {% if event_data %}
-{% if kollege_data %}
+{% if kollege_id %}
+{% if psToEmail %}
 <h2>Dr(a) {{extra}},</h2>
 
 <h2>Esta é sua agenda de amanhã conosco:</h2>
 <ul>
 
     {% for ev in event_data %}
-    {% for per in persona_data %}
-    {% if kollege_data == ev.kollege_id %}
-    {% if per.id == ev.persona_id %}
+    {% if kollege_id == ev.kollege_id %}
 		{% if ev.color != '#FFFFFF' %}
                 <p>
-                        Cliente: {{per.name}}<br>
+                        Cliente: {{psToEmail.0.name}}<br>
                         Exame: {{ev.title}}<br>
 			            Data: {{ev.start}}
                 </p>
 		{% endif %}
     {% endif %}
-    {% endif %}
-    {% endfor %}
     {% endfor %}
 
 </ul>
+{% endif %}
 {% endif %}
 {% endif %}
 {% endif %}

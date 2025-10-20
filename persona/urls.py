@@ -1,8 +1,12 @@
 # pylint: disable=import-error
 # pylint: disable=no-name-in-module
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import path
 from persona import views
 from rest_framework.urlpatterns import format_suffix_patterns
+
+from persona.utils.report_pdf import build_pdf_for_eventreport
 
 
 urlpatterns =[
@@ -77,12 +81,52 @@ urlpatterns =[
       path('eventreports/<int:pk>/',
             views.EventReportDetail.as_view(),
             name='eventreport-detail'),
+            
+      # based on Report Project.docx      
+      path('eventreports/<int:pk>/generate-pdf/', views.EventReportGeneratePDF.as_view(),
+         name='eventreport-generate-pdf'),
+      #path('persona/eventreports/<int:pk>/generate-pdf/', views.test_pdf, name='eventreport-generate-pdf'),
+      path('eventreports/<int:pk>/download/', views.EventReportDownload.as_view(),
+         name='eventreport-download'),
+
+
       path('uploads/images/',
            views.upload_images_view),
 #     path('upload-pdf/',
  #           PDFUploadView.as_view(),
   #          name='pdf-upload'),
+
+      # Endpoint to get data from Angukar and capture image with flaskapi running on local:8001
+      #path('capture/',
+       #    views.EventReportImageCapture.as_view(),
+        #   name='eventreportimagecapture'),
+
+      path('capture/', views.CaptureImageView.as_view(), name='capture-image'),
+      path('temp-images/', views.TemporaryImageList.as_view(), name='temp-image-list'),
+     # path('image-from-path-or-field/', views.ImageFromPathOrFieldList.as_view(), name='image_from_path_or_field-list'),
+      path('temp-images/<int:pk>/', views.DeleteTemporaryImage.as_view(), name='temp-image-delete'),
+      path('temp-images/del-all/', views.DeleteAllTempImage.as_view(), name='temp-image-delete-all'),
+      path('events/<int:event_id>/save-images/', views.SaveSelectedImages.as_view(), name='save-selected-images'),
+      path('eventreportimage/<int:pk>/', views.EventReportImageDetail.as_view(), name='selected-images-details'),
+      path('event/<int:pk>/report-images/', views.RemoteImageList.as_view(), name='remote-images')
+
+      
+#      path('capture/<int:pk>/',
+ #          views.EventReportImageCapture.as_view(),
+  #         name='eventreportimage'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+#urlpatterns += [
+ #   path('temp-images/', views.TemporaryImageList.as_view(), name='temp-image-list'),
+  #  path('temp-images/upload/', views.TemporaryImageUpload.as_view(), name='temp-image-upload'),
+   # path("events/<int:event_id>/save-images/", views.SaveSelectedImages.as_view(), name="save-selected-images"),
+#]
+
+
 '''
     path('personas/',
           views.PersonaList.as_view(),

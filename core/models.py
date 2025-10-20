@@ -1,3 +1,5 @@
+from datetime import timedelta
+import os
 import uuid
 from time import gmtime, strftime
 from django.db import models
@@ -157,7 +159,7 @@ class Event(models.Model):
 
     def __str__(self):
         #name = self.start.strftime('%x'+' %X') + ' ' + self.title
-        name = f"{self.title} at {self.start.astimezone()}"
+        name = f"{self.id} {self.title} at {self.start.astimezone()}"
         return name
 
     class Meta:
@@ -245,13 +247,14 @@ class EventReport(models.Model):
     #500 Error: no field 'id' in eventreport. Or, integrity error, occurred cause Django created an auto id as primary key.
     #The primary key must be the event.
     #Ex at https://docs.djangoproject.com/en/5.0/topics/db/examples/one_to_one/ has a primary_key !!!
-    event = models.ForeignKey('Event', on_delete=models.CASCADE)
+    event = models.ForeignKey('Event', on_delete=models.CASCADE, related_name='eventreport')
 
     #event = models.ForeignKey('Event', on_delete=models.CASCADE)
 
     # Cause of this, conc1 is required. If not, gets error: __str__ not a string
     def __str__(self):
-        return str(self.conc1)+" "+str(self.conc2)
+        #return f"Report for {self.event}"
+        return str(self.id)+" "+str(self.conc1)+" "+str(self.conc2)
 
     class Meta:
         ordering = ['id', 'assistant',]
@@ -265,10 +268,35 @@ class EventReportImage(models.Model):
     #report = models.ForeignKey('EventReport', on_delete=models.CASCADE, related_name='images', null=True, blank=True)
     image_file = models.ImageField(upload_to='events/%Y/%m/%d/images/')
     caption = models.CharField(max_length=255, blank=True)
+    comment = models.CharField(max_length=255, blank=True, null=True)
+    local_path = models.CharField(max_length=500, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Image {self.pk} for event {self.event_id}"
+        return f"EventReportImage {self.pk} for event {self.event_id}"
+
+# use the storage configured in settings
+temp_storage = settings.TEMP_MEDIA_STORAGE
+
+def temp_image_upload_path(instance, filename):
+    """Callable to create folder to upload TemporaryImage"""
+    # amend but better prevent Django receiving naive time from angular (event.start)
+    three_hours_ago = timezone.now() - timedelta(hours=3)
+    date_path = 'temp_images/'+three_hours_ago.strftime("%Y/%m/%d/images")
+    return os.path.join(date_path, filename)
+
+# Chat Temporary storage layer before upload to S31.doc
+class TemporaryImage(models.Model):
+    # related_name not working?
+    event = models.ForeignKey('Event', on_delete=models.CASCADE, related_name='tempimages', null=True, blank=True)
+    image_file = models.ImageField(upload_to=temp_image_upload_path, storage=temp_storage)
+    caption = models.CharField(max_length=255, blank=True, null=True)
+    comment = models.CharField(max_length=255, blank=True, null=True)
+    local_path = models.CharField(max_length=500, blank=True, null=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"TemporaryImage {self.pk}"
 
 class Persona(models.Model):
     """Persona model"""

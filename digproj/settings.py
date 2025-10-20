@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
+from django.core.files.storage import FileSystemStorage
 import os
 from decouple import config
 #from dj_database_url import parse as dburl
@@ -19,10 +20,21 @@ from corsheaders.defaults import default_headers
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
+# Chat End-To-End Temp Storage.doc
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# directory where temporary capture images are stored
+TEMP_MEDIA_ROOT = MEDIA_ROOT #os.path.join(MEDIA_ROOT, 'temp_images')
+# FileSystemStorage instance used for TemporaryImage fields
+TEMP_MEDIA_STORAGE = FileSystemStorage(location=TEMP_MEDIA_ROOT)
+# Path to save temp images in the local intranet.
+TEMP_IMAGE_LOCAL_PATH = TEMP_MEDIA_ROOT #os.path.join(MEDIA_ROOT, 'temp_images') #"/mnt/intranet/temp_images/"
 
 ALLOWED_HOSTS = [
     '52.44.41.170', #AWS Elastic IP 26-12-24 for instance digproj1224
-    '3.230.207.81' #AWS Elastic IP devDigproj1224
+    '3.230.207.81', #AWS Elastic IP devDigproj1224
     'digest.com.br',
     'api.digest.com.br',
     'dev.digest.com.br',
@@ -106,7 +118,7 @@ DATABASES = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dig180825',
+        'NAME': 'dig1224_test',
         'USER': '',
         'PASSWORD': '',
         'HOST': 'localhost',
@@ -211,6 +223,10 @@ AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME') # os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
 AWS_QUERYSTRING_AUTH = True   # generate signed URLs
+
+AWS_DEFAULT_ACL = None
+AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "max-age=86400"}
+
 
 """Added 22-12-25"""
 

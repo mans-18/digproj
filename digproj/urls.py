@@ -15,11 +15,13 @@ Including another URLconf
 """
 # pylint: disable=import-error
 # pylint: disable=no-name-in-module
+from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import include
 from persona import views
 from rest_framework.authtoken.views import obtain_auth_token
+from django.conf.urls.static import static
 
 
 urlpatterns = [
@@ -35,3 +37,32 @@ urlpatterns += [
     path('auth/', views.EventList.as_view(),
            name='event-list'),
 ]
+
+'''
+Your Django application handles two different jobs:
+
+1. Storage (Saving the file): Handled by the model and FileSystemStorage.
+   · This is what MEDIA_ROOT and TEMP_MEDIA_STORAGE control.
+   · They tell Django "save the uploaded file to this specific folder on the server's hard drive."
+   · This is working correctly for you now.
+2. Serving (Sending the file to a browser): Handled by a web server.
+   · When a browser requests http://127.0.0.1:8000/media/temp_images/myimage.jpg, something needs to find that file on the disk and send it back.
+   · In production, this job is handled by a dedicated web server like Nginx or Apache. They are extremely fast and efficient at this task.
+   · In development, you don't have Nginx. So, you need something else to serve these files. This is what the static() function in urls.py does.
+
+Without the `urls.py` line:
+
+1. The browser requests .../media/temp_images/capture_123.jpg.
+2. Django looks at its list of URL patterns (urlpatterns). It only finds patterns for admin/, api/, etc.
+3. Django doesn't find a match for media/..., so it returns a 404 Page Not Found error. The image breaks.
+
+With the `urls.py` line:
+
+1. The browser requests .../media/temp_images/capture_123.jpg.
+2. Django looks at its URL patterns. It finds the pattern added by static() which says "I handle URLs that start with `/media/`".
+3. Django takes the part after /media/ (temp_images/capture_123.jpg), looks for it in the MEDIA_ROOT directory, finds the file, and serves it. The image loads correctly.
+
+'''
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

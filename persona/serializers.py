@@ -1,6 +1,6 @@
 # pylint: disable=import-error
 from rest_framework import serializers
-from core.models import User, Kollege, Event, Persona, EventReport, EventReportImage, Partner, Procedure, GenericGroup, EmailFromSite
+from core.models import TemporaryImage, User, Kollege, Event, Persona, EventReport, EventReportImage, Partner, Procedure, GenericGroup, EmailFromSite
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for User objects"""
@@ -79,10 +79,149 @@ class EventSerializer(serializers.ModelSerializer):
         read_only_fields = ('id',)
 
 ######## FRom ChatGPT 10-08-25 ####################
+'''
 class EventReportImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventReportImage
         fields = ['id', 'event', 'report', 'image_file', 'caption', 'uploaded_at']
+
+
+class EventReportImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EventReportImage
+        fields = ["id", "event", "caption", "uploaded_at", "image_url"]
+
+    def get_image_url(self, obj):
+        if obj.image_file:
+            return obj.image_file.url  # boto3 storage returns signed or public URL
+        return None
+'''
+
+'''
+import boto3
+from django.conf import settings
+
+s3_client = boto3.client("s3", region_name=settings.AWS_S3_REGION_NAME)
+
+class EventReportImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EventReportImage
+        fields = ["id", "event", "caption", "image_url"]
+
+    def get_image_url(self, obj):
+        try:
+            return s3_client.generate_presigned_url(
+                "get_object",
+                Params={
+                    "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
+                    "Key": obj.image_file.name,  # path in bucket
+                },
+                ExpiresIn=3600,  # 1 hour
+            )
+        except Exception as e:
+            return None
+'''
+
+
+# serializers.py
+import boto3
+from django.conf import settings
+
+class EventReportImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EventReportImage
+        fields = ["id", "image_file", "caption", "comment", "local_path", "uploaded_at", "image_url"]
+
+    def get_image_url(self, obj):
+        try:
+            s3_client = boto3.client(
+                "s3",
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name=settings.AWS_S3_REGION_NAME,
+            )
+            url = s3_client.generate_presigned_url(
+                "get_object",
+                Params={
+                    "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
+                    "Key": obj.image_file.name,  # <- use the path stored by Django
+                },
+                #ExpiresIn=3600,     # 1 hour
+                #ExpiresIn=86400,    # 1 day
+                ExpiresIn=604800,   # 1 week
+                #ExpiresIn=2592000,  # 1 month
+                #ExpiresIn=7776000,  # 3 months
+            )
+            return url
+        except Exception as e:
+            print("Presign URL error:", e)
+            return None
+
+class PutEventReportImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventReportImage
+        fields = ["id", "caption", "comment",]
+
+# Chat E-t-e Temporary storage.doc
+'''
+class CaptureImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TemporaryImage
+        fields = ['id', 'caption', 'uploaded_at', 'image_url']
+
+        def get_image_url(self, obj):
+            request = self.context.get('request')
+            if not obj.image:
+                return None
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            else:
+                return obj.image.url
+'''
+
+'''              
+class TemporaryImageSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(use_url=True)
+    class Meta:
+        model = TemporaryImage
+        fields = ['id', 'caption', 'uploaded_at', 'image']
+
+        def get_image_url(self, obj):
+            request = self.context.get('request')
+            if not obj.image:
+                return None
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            else:
+                return obj.image.url
+'''
+
+
+class TemporaryImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+    class Meta:
+        model = TemporaryImage
+        fields = ['id', 'event', 'caption', 'comment', 'local_path', 'uploaded_at', 'image_url']
+
+    # Overrides default and constructs a fully qualified url
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.image_file and hasattr(obj.image_file, 'url'):
+            # Without the below line the images is saved correctly in "/media/temp_images/
+            # but obj.image_url is returned as /media/ only
+            #fixed_path = f"/media/temp_images/{obj.image.name}"
+            #return request.build_absolute_uri(fixed_path)#obj.image.url)
+            # No need for the above after uploadto='temp_images/'in the models;
+            # and setting all media to MEDIA_ROOT in the settings.py
+            return request.build_absolute_uri(obj.image_file.url)
+
+        return None
 
 class EventReportSerializer(serializers.ModelSerializer):
     images = EventReportImageSerializer(many=True, read_only=True)

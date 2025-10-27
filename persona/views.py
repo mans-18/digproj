@@ -1,68 +1,43 @@
 # pylint: disable=import-error
 import os
-import sys
+import uuid
 import boto3
-import argparse
-from collections import defaultdict
-import smtplib, datetime, cgi, json
+import datetime, json
 from datetime import datetime, timedelta
-import cv2, tempfile, time
-
-from rest_framework import status, permissions
-from rest_framework import generics, permissions, mixins, filters
+from rest_framework import generics, status, permissions, mixins, filters
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
-#from rest_framework.permissions import IsAuthenticated
-from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer
-#from rest_framework.response import Response
-#from rest_framework.decorators import api_view
 from rest_framework.reverse import reverse
-#from rest_framework.views import APIView
-#from rest_framework.response import Response
 from rest_framework.decorators import api_view, parser_classes, permission_classes
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from rest_framework.permissions import IsAuthenticated, AllowAny
-#from rest_framework.response import Response
-#from rest_framework import status
-#from rest_framework.authentication import TokenAuthentication
-#from rest_framework.views import APIView
-#from rest_framework.permissions import IsAuthenticated
-
-from django.http import HttpResponse
-from core.models import EventReport
-from core.models import User, Kollege, Event, Persona, GenericGroup, EventReport, Partner, Procedure
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAuthenticated
+from django.core.files.base import ContentFile
+from django.utils import timezone
+from core.models import (User, Kollege, Event, Persona, GenericGroup,
+                        EventReport, Partner, Procedure, Event, EventReport,
+                        EventReportImage, TemporaryImage)
 from django.template.loader import render_to_string
-from django.db.models import Q
-from django.core.mail import send_mail, EmailMessage
-from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
 from django_filters.rest_framework import DjangoFilterBackend
-
-from email.mime.text import MIMEText
-
 from django.shortcuts import get_object_or_404
-from django.core.files.base import File
-
-from core.models import Event, EventReportImage, EventReport
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.shortcuts import render, get_object_or_404, redirect
-from django.shortcuts import get_object_or_404
-from core.models import Event, EventReport, EventReportImage, TemporaryImage
-from .serializers import EventReportImageSerializer, EventReportSerializer, PutEventReportImageSerializer, TemporaryImageSerializer
-from .pdf_builder import build_eventreport_pdf  # we'll create this next
 from persona.serializers import (UserSerializer,
                                  KollegeSerializer,
                                  PersonaSerializer,
                                  EventSerializer,
                                  EventReportSerializer,
+                                 EventReportImageSerializer,
+                                 TemporaryImageSerializer,
+                                 PutEventReportImageSerializer,
                                  PartnerSerializer,
                                  ProcedureSerializer,
                                  GenericGroupSerializer,
                                  EmailFromSiteSerializer)
-from persona.utils.report_pdf import build_pdf_for_eventreport, download_report, sign_pdf_bytes_if_configured
+from persona.utils.report_pdf import build_pdf_for_eventreport, sign_pdf_bytes_if_configured
 from persona.permissions import IsSuperOrReadOnly
 
 
@@ -79,17 +54,12 @@ def generate_signed_url(file_field, expires_in=3600):
     )
 
 
-##########based on ReportProject.docx
-
 class EventReportGeneratePDF(APIView):
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = (TokenAuthentication,)
 
     def post(self, request, pk):
         event_report = get_object_or_404(EventReport, pk=pk)
-
-    #def get(self, request, pk):
-     #   event_report = get_object_or_404(EventReport, pk=pk)
 
 # authorization: allow staff/partner who owns the kollege or superuser
         if not (request.user.is_staff or request.user.is_superuser or request.user.is_partner):
@@ -133,7 +103,7 @@ class EventReportGeneratePDF(APIView):
                 p12_password=getattr(settings, "PDF_P12_PASSWORD", "")
             )
 
-# Save to S3 via FileField (path: reports/%Y/%m/%d/pdfs/)
+        # Save to S3 via FileField (path: reports/%Y/%m/%d/pdfs/)
         #filename = f"event_{event_report.event_id}_report_{event_report.pk}_{event_report.event.start}.pdf"
         filename = f"event_{event_report.event_id}_{timezone.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:8]}.pdf"        
         event_report.pdf_file.save(filename, ContentFile(pdf_bytes), save=True)
@@ -173,158 +143,43 @@ class EventReportDownload(APIView):
         return Response({"url": url}, status=status.HTTP_200_OK)
 
 
-class EventReportImageCapture(APIView):
-    """
-    Capture multiple images from USB camera, save to S3, return signed URLs.
-    """
-    permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = (TokenAuthentication,)
-
-    def post(self, request):
-        eventid = request.data.get("event")
-        reportid = request.data.get("eventreport")
-        captions = request.data.get("captions", [])
-
-        event = get_object_or_404(Event, pk=eventid)
-        event_report = get_object_or_404(EventReport, pk=reportid) if reportid else None
-
-        DEVICE_INDEX = 1  # adjust to your device
-
-        if not (request.user.is_staff or request.user.is_superuser or getattr(request.user, "is_partner", False)):
-            return Response({"detail": "Not allowed"}, status=status.HTTP_403_FORBIDDEN)
-        #cap = cv2.VideoCapture(DEVICE_INDEX, cv2.CAP_DSHOW)
-        cap = cv2.VideoCapture(DEVICE_INDEX, cv2.CAP_AVFOUNDATION)
-        if not cap.isOpened():
-            return Response({"error": "Cannot open camera"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        results = []
-        for caption in captions:
-            ret, frame = cap.read()
-            if not ret:
-                results.append({"caption": caption, "uploaded": False, "error": "Failed to capture frame"})
-                continue
-
-            temp_file = tempfile.NamedTemporaryFile(suffix=".jpg")
-            cv2.imwrite(temp_file.name, frame)
-            temp_file.seek(0)
-
-            image_instance = EventReportImage(event=event, caption=caption)
-            filename = f"event_{eventid}_{timezone.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:8]}.jpg"
-            #filename = f"{event_id}_{int(time.time())}.jpg"
-            image_instance.image_file.save(filename, File(temp_file), save=True)
-            temp_file.close()
-
-            # Serialize to get signed URL
-            data = EventReportImageSerializer(image_instance).data
-
-            results.append({
-                "caption": caption,
-                "uploaded": True,
-                "image_url": data["image_url"],  # signed URL
-            })
-
-            print("DEBUG signed URL:", data["image_url"])
-
-        cap.release()
-        return Response({"results": results}, status=status.HTTP_201_CREATED)
-
-
-
-
-from django.core.files.base import ContentFile
-from django.utils import timezone
-import uuid, threading
-
-import portalocker
-from django.db import transaction
-
-
-# TO implement
 class CaptureImageView(APIView):
     """
-    Capture an image with dual storage (S3 + local),
-    and return both in the API response.
+    Receives image + metadata from local FastAPI.
+    Saves to S3 (and optionally local temp folder).
     """
 
     def post(self, request, *args, **kwargs):
-        eventid = request.data.get('eventid', 'noevent')
-        caption = request.data.get('caption', '')
-        comment = request.data.get('comment', '')
-        device_index = int(request.data.get("device", 0))
-        print('device_index in CaptureImageView', device_index)
+        print('request data at view', request.data)
+        eventid = request.data.get("eventid", "noevent")
+        caption = request.data.get("caption", "")
+        comment = request.data.get("comment", "")
+        image_file = request.FILES.get("image_file")
 
-        # --- Ensure lock dir ---
-        lock_file = os.path.join(getattr(settings, "LOCK_PATH", "/tmp"), "camera.lock")
-        os.makedirs(os.path.dirname(lock_file), exist_ok=True)
+        if not image_file:
+            return Response({"error": "No image provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-        with portalocker.Lock(lock_file, timeout=10):
-            cap = None
-            temp_path = None
+        try:
+            filename = image_file.name
+            temp_img = TemporaryImage(caption=caption, comment=comment)
+            temp_img.image_file.save(filename, image_file, save=False)
 
-            try:
-                # --- Pick backend ---
-                backend = 0
-                if os.name == "posix" and sys.platform == "darwin":
-                    backend = cv2.CAP_AVFOUNDATION
-                elif os.name == "nt":
-                    backend = cv2.CAP_DSHOW
+            # Save locally too (optional)
+            local_folder = getattr(settings, "TEMP_IMAGE_LOCAL_PATH", "/tmp/temp_images/")
+            os.makedirs(local_folder, exist_ok=True)
+            local_path = os.path.join(local_folder, filename)
+            with open(local_path, "wb") as f:
+                for chunk in image_file.chunks():
+                    f.write(chunk)
 
-                cap = cv2.VideoCapture(device_index, backend)
-                if not cap.isOpened():
-                    return Response(
-                        {"error": "Camera could not be opened"},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    )
+            temp_img.local_path = local_path
+            temp_img.save()
 
-                ret, frame = cap.read()
-                if not ret:
-                    return Response(
-                        {"error": "Failed to capture image"},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    )
+            serializer = TemporaryImageSerializer(temp_img, context={"request": request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-                ############# From previous version ###############
-                ok, buf = cv2.imencode('.jpg', frame)
-                if not ok:
-                    return Response({"error": "Failed to encode frame"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-                # Generate unique filename
-                filename = f"event_{eventid}_{timezone.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex[:8]}.jpg"
-                django_file = ContentFile(buf.tobytes(), name=filename)
-
-                # --- Save to S3 via FileField but not yet ---
-                temp_img = TemporaryImage(caption=caption, comment=comment)
-                temp_img.image_file.save(filename, django_file, save=False) # don't save yet: False (was True)
-
-                # --- Save a local copy to the temp_images/... ---
-                local_folder = getattr(settings, "TEMP_IMAGE_LOCAL_PATH", "/temp_images/")
-                os.makedirs(local_folder, exist_ok=True)
-                local_path = os.path.join(local_folder, filename)
-                with open(local_path, "wb") as f:
-                    f.write(buf.tobytes())
-
-                temp_img.local_path = local_path  # store local path in DB
-
-                temp_img.save()  # now save S3 + local reference
-
-                serializer = TemporaryImageSerializer(temp_img, context={'request': request})
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-            except Exception as e:
-                return Response(
-                    {"error": str(e)},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                )
-
-            finally:
-                if cap:
-                    cap.release()
-                if temp_path and os.path.exists(temp_path):
-                    try:
-                        os.remove(temp_path)  # cleanup temp
-                    except OSError:
-                        pass
-
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class TemporaryImageList(APIView, mixins.DestroyModelMixin):
@@ -343,8 +198,6 @@ class TemporaryImageList(APIView, mixins.DestroyModelMixin):
     def delete(self, request, *args, **kwargs):
         TemporaryImage.objects.all().delete()
         return Response({"detail": "All temporary images deleted"}, status=status.HTTP_204_NO_CONTENT)
-
-
 
 
 class RemoteImageList(APIView, ):

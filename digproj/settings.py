@@ -120,7 +120,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'dig1224_test',
         'USER': '',
-        'PASSWORD': '',
+        'PASSWORD': 'leugim2020',
         'HOST': 'localhost',
         'PORT': '5432',
      }

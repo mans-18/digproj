@@ -1,9 +1,10 @@
 # pylint: disable=import-error
 import os
+import threading
 import uuid
 import boto3
 import datetime, json
-from datetime import datetime, timedelta
+#from datetime import datetime, timedelta
 from rest_framework import generics, status, permissions, mixins, filters
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -21,6 +22,7 @@ from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
+from django.views.decorators.csrf import csrf_exempt  # 👈 important
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from django.conf import settings
@@ -369,11 +371,31 @@ def upload_images_view(request):
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+
+
+
+
+
+
+
+
+
+
+
+from datetime import date, timedelta
+from django.core.mail import send_mail
+from django.conf import settings
+from django.core.management.base import BaseCommand
+
+from core.models import Persona, Event
+
+
+'''
 class EmailKollege(mixins.ListModelMixin,
                    mixins.CreateModelMixin,
                    generics.GenericAPIView):
     # pylint: disable=no-member
-    queryset = Event.objects.filter(start__gte=datetime.today())
+    queryset = Event.objects.filter(start__gte=date.today())
     serializer_class = EventSerializer
 
     # @xframe_options_exempt
@@ -388,10 +410,10 @@ class EmailKollege(mixins.ListModelMixin,
             toEmailCount = len(toEmail)
 
             qs = Event.objects.order_by('start').filter(
-            start__date=datetime.date.today()+timedelta(days=1)).values()
+            start__date=date.today()+datetime.timedelta(days=1)).values()
             lqs = list(qs)
             ps = Persona.objects.filter(
-            event_persona__start__date=datetime.date.today()+timedelta(days=1)).values()
+            event_persona__start__date=date.today()+datetime.timedelta(days=1)).values()
             lps = list(ps)
 
             psToEmail = []
@@ -420,6 +442,174 @@ class EmailKollege(mixins.ListModelMixin,
 
         self.email_kollege(request)
         return self.list(request, *args, **kwargs)
+'''
+        
+
+'''
+
+# views.py
+from datetime import date, timedelta
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from core.models import Event, Persona, Kollege  # adjust imports as needed
+import json
+
+
+class EmailKollege(APIView):
+    """
+    Sends tomorrow's schedule to selected colleagues.
+    """
+    def post(self, request):
+        try:
+            # Parse input only once
+            kol_list = request.data  # DRF parses JSON automatically
+            if not kol_list:
+                return Response({"detail": "Nenhum colega informado."}, status=400)
+
+            to_emails = ['digest.principal@gmail.com']
+            kol_ids = [k['id'] for k in kol_list if 'id' in k]
+            kol_names = {k['id']: k.get('name', '') for k in kol_list if 'id' in k}
+            to_emails.extend([k['email'] for k in kol_list if k.get('email')])
+            to_email_count = len(to_emails)
+
+            tomorrow = date.today() + timedelta(days=1)
+
+            # Filter only needed events (kollege + tomorrow)
+            events = (
+                Event.objects
+                .filter(start__date=tomorrow, kollege_id__in=kol_ids)
+                .select_related('persona', 'kollege')
+                .order_by('start')
+            )
+
+            if not events.exists():
+                return Response({"detail": "Nenhum evento encontrado para amanhã."}, status=204)
+
+            # Build per-kollege email content
+            sent = 0
+            for kol_id in kol_ids:
+                kol_events = [ev for ev in events if ev.kollege_id == kol_id]
+                if not kol_events:
+                    continue
+
+                persona_data = [
+                    {
+                        "name": ev.persona.name,
+                        "start": ev.start,
+                        "title": ev.title,
+                        "color": ev.color,
+                    }
+                    for ev in kol_events
+                ]
+
+                context = {
+                    "event_data": kol_events,
+                    "persona_data": persona_data,
+                    "kollege_id": kol_id,
+                    "extra": kol_names[kol_id],
+                    "toEmailCount": to_email_count,
+                }
+
+                msg_html = render_to_string('email2.html', context)
+                send_mail(
+                    subject=f"Agenda de amanhã - {kol_names[kol_id]}",
+                    message="Veja sua agenda de amanhã.",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[k['email'] for k in kol_list if k['id'] == kol_id and k.get('email')],
+                    html_message=msg_html,
+                    fail_silently=False,
+                )
+                sent += 1
+
+            return Response({"detail": f"E-mails enviados: {sent}"}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+'''
+
+
+# Functionaing manual class
+
+class EmailKollege(APIView):
+    """
+    Sends tomorrow's schedule to selected colleagues in a background thread.
+    """
+    def post(self, request):
+        kol_list = request.data
+        if not kol_list:
+            return Response({"detail": "Nenhum colega informado."}, status=400)
+
+        # Launch email sending in a separate thread
+        thread = threading.Thread(target=self.send_emails, args=(kol_list,))
+        thread.start()
+
+        return Response({"detail": "Emails are being sent in the background."}, status=status.HTTP_202_ACCEPTED)
+
+    def send_emails(self, kol_list):
+        tomorrow = date.today() + timedelta(days=1)
+        kol_ids = [k['id'] for k in kol_list if 'id' in k]
+        kol_email_map = {k['id']: k.get('email') for k in kol_list if 'id' in k}
+        kol_name_map = {k['id']: k.get('name', '') for k in kol_list if 'id' in k}
+        cc_email = "digest.principal@gmail.com"
+        
+        # Fetch all events for tomorrow for selected colleagues
+        events = (
+            Event.objects
+            .filter(start__date=tomorrow, kollege_id__in=kol_ids)
+            .select_related('persona')  # avoids extra queries for persona
+            .order_by('start')
+        )
+
+        # Group events by kollege_id
+        events_by_kollege = {}
+        for ev in events:
+            events_by_kollege.setdefault(ev.kollege_id, []).append(ev)
+
+        # Send emails per colleague
+        for kol_id, kol_events in events_by_kollege.items():
+            email = kol_email_map.get(kol_id)
+            if not email:
+                continue
+
+            # Build persona/event data for template
+            persona_data = [
+                {
+                    "name": ev.persona.name,
+                    "start": ev.start,
+                    "title": ev.title,
+                    "color": ev.color,
+                }
+                for ev in kol_events
+            ]
+
+            context = {
+                "event_data": kol_events,
+                "persona_data": persona_data,
+                "kollege_id": kol_id,
+                "extra": kol_name_map.get(kol_id, ""),
+                "toEmailCount": len(kol_list) + 1,
+            }
+
+            msg_html = render_to_string('email2.html', context)
+
+            try:
+                send_mail(
+                    subject=f"Agenda de amanhã - {kol_name_map.get(kol_id, '')}",
+                    message="Segue sua agenda de amanhã.",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[email] + [cc_email],
+                    html_message=msg_html,
+                    fail_silently=False,
+                )
+            except Exception as e:
+                # Optionally log the error
+                print(f"Failed to send email to kollege_id {kol_id}: {e}")
+
 
 class EmailFromSite(mixins.ListModelMixin,
                     mixins.CreateModelMixin,
@@ -530,8 +720,8 @@ class KollegeList(mixins.ListModelMixin,
     # If active, auth is done with token sent in the header (by ModHeader) and actions are activated
     authentication_classes = (TokenAuthentication,)
 
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['name', 'crm']
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', 'crm']
 
     def get(self, request, *args, **kwargs):
 
@@ -583,6 +773,9 @@ class PartnerList(mixins.ListModelMixin,
     queryset = Partner.objects.all()
     serializer_class = PartnerSerializer
     authentication_classes = (TokenAuthentication,)
+
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', 'crm']
 
     def get(self, request, *args, **kwargs):
         txt = request.headers
@@ -694,18 +887,18 @@ class PersonaListLimited(mixins.ListModelMixin,
         if (kollege_with_email):
             #Fetch fresh data each time the view is accessed
             return list(set(Persona.objects.filter(
-            event_persona__start__gt=datetime.today()-timedelta(days=30),
-            event_persona__start__lte=datetime.today()+timedelta(days=30))))
+            event_persona__start__gt=date.today()-timedelta(days=30),
+            event_persona__start__lte=date.today()+timedelta(days=30))))
         else:
             return list(set(Persona.objects.filter(
-            event_persona__start__gt=datetime.today()-timedelta(days=180),
-            event_persona__start__lte=datetime.today()+timedelta(days=180))))
+            event_persona__start__gt=date.today()-timedelta(days=180),
+            event_persona__start__lte=date.today()+timedelta(days=180))))
          
 
     serializer_class = PersonaSerializer
 
     filter_backends = [filters.SearchFilter]
-    search_fields = ['name','dob','email','mobile']
+    search_fields = ['name', 'mobile']
 
     authentication_classes = (TokenAuthentication,)
 
@@ -785,13 +978,13 @@ class EventListLimited(mixins.ListModelMixin,
         kollege_with_email = (Kollege.objects.filter(email=user_email))
         if (kollege_with_email):
             queryset = Event.objects.filter(kollege_id=kollege_with_email.first()).filter(
-                start__gte=datetime.today()-timedelta(days=1),
-                start__lte=datetime.today()+timedelta(days=60)).exclude(status='cancelado')
+                start__gte=date.today()-timedelta(days=1),
+                start__lte=date.today()+timedelta(days=60)).exclude(status='cancelado')
             return queryset
         else:
             queryset = Event.objects.filter(
-            start__gte=datetime.today()-timedelta(days=7),
-            start__lte=datetime.today()+timedelta(days=60)).exclude(status='cancelado')
+            start__gte=date.today()-timedelta(days=90),
+            start__lte=date.today()+timedelta(days=60)).exclude(status='cancelado')
             return queryset
 
     serializer_class = EventSerializer
@@ -822,14 +1015,14 @@ class EventsByDateRange(mixins.ListModelMixin,
         if (kollege_with_email):
             format_str = '%d/%m/%Y'
             queryset = Event.objects.filter(kollege_id=kollege_with_email.first()).filter(
-                start__gte = datetime.strptime(start_date, format_str),
-                start__lte=datetime.strptime(end_date, format_str)).exclude(status='cancelado')
+                start__gte = datetime.datetime.strptime(start_date, format_str),
+                start__lte=datetime.datetime.strptime(end_date, format_str)).exclude(status='cancelado')
             return queryset
         else:
             format_str = '%d/%m/%Y'
             queryset = Event.objects.filter(
-                start__gte = datetime.strptime(start_date, format_str),
-                start__lte=datetime.strptime(end_date, format_str)).exclude(status='cancelado')
+                start__gte = datetime.datetime.strptime(start_date, format_str),
+                start__lte=datetime.datetime.strptime(end_date, format_str)).exclude(status='cancelado')
             return queryset
 
 

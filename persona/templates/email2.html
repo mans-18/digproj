@@ -1,5 +1,5 @@
 
-<h1>Bom dia!!!</h1>
+<!--<h1>Bom dia!!!</h1>
 {% if toEmailCount < 4 %}
 
 {% if extra %}
@@ -31,5 +31,21 @@
 {% endif %}<br>
 <h2>Digest</h2>
 <p>85 996288800</p>
-<p>85 32241547</p>
+<p>85 32241547</p>-->
 
+
+<h2>Bom dia Dr(a) {{ extra }}!</h2>
+<p>Esta é sua agenda de amanhã:</p>
+
+{% for ev in event_data %}
+  {% if ev.color != '#FFFFFF' %}
+    <p>
+      <strong>Cliente:</strong> {{ ev.persona.name }}<br>
+      <strong>Exame:</strong> {{ ev.title }}<br>
+      <strong>Data:</strong> {{ ev.start|date:"d/m/Y H:i" }}
+    </p>
+  {% endif %}
+{% endfor %}
+
+<hr>
+<p>Digest<br>85 996288800<br>85 32241547</p>

@@ -44,10 +44,7 @@ ALLOWED_HOSTS = [
 
 #evironment vars done (DEBUG, SECRET_KEY, DB, EMAIL) with decouple.config
 #stored at .env (must go to .gitignore)
-#DEBUG = True
-############## For local DB, localhost ###########
-#SECRET_KEY='h%$7j91w!qrkc=ve+0g#^vz)x=n-9@-b70fs@6a*fb$m9^4mxx'
-##################################################
+
 DEBUG = config('DEBUG', default=False, cast=bool)
 SECRET_KEY = config('SECRET_KEY')
 
@@ -120,7 +117,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'dig1224_test',
         'USER': '',
-        'PASSWORD': 'leugim2020',
+        'PASSWORD': config('PW_LOCAL'),
         'HOST': 'localhost',
         'PORT': '5432',
      }
@@ -201,27 +198,14 @@ STORAGES = {
 }
 '''
 
-# FROM CHATGPT: 
-# ERROR: dashboard.component.ts:159 ERROR RuntimeError:
-# NG0900: Error trying to diff '[object Object]'. Only arrays and iterables are allowed
-#REST_FRAMEWORK = {
-#    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-#    'PAGE_SIZE': 50,
-#}
-
-#AWS_ACCESS_KEY_ID = config('your-access-key-id')
-#AWS_SECRET_ACCESS_KEY = config('your-secret-access-key')
-#AWS_STORAGE_BUCKET_NAME = config('your-bucket-name')
-#AWS_S3_REGION_NAME = config('your-region')  # e.g., 'us-east-1'
-
 """ ChatGPT 10-08-2025"""
 
 INSTALLED_APPS += ['storages']
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID') #"AKIA2LGBBDMAZ7VZSG4F" #os.environ['AWS_ACCESS_KEY_ID']
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME') # os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
+AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME')
 AWS_QUERYSTRING_AUTH = True   # generate signed URLs
 
 AWS_DEFAULT_ACL = None

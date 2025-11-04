@@ -1146,6 +1146,133 @@ class EventReportList(mixins.ListModelMixin,
         # print('user ', request.user)
         return self.create(request, *args, **kwargs)
 
+
+
+from django.core.cache import cache
+
+class EventReportById(mixins.ListModelMixin,
+                      mixins.CreateModelMixin,
+                      generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+    serializer_class = EventReportSerializer
+
+    def get_queryset(self):
+        event_id = self.kwargs.get('pk')
+        cache_key = f"event_report_{event_id}"
+
+        # ✅ Try cached data first
+        cached_qs = cache.get(cache_key)
+        if cached_qs:
+            print("💾 Using cached EventReport queryset")
+            return cached_qs
+
+        # ✅ Query and optimize only via select_related('event')
+        queryset = (
+            EventReport.objects
+            .filter(event__id=event_id)
+            .select_related('event')  # Valid optimization
+        )
+
+        # ✅ Cache evaluated queryset list for 2 minutes
+        data = list(queryset)
+        cache.set(cache_key, data, timeout=120)
+
+        print(f"📊 Cached {len(data)} EventReport(s) for event {event_id}")
+        return data
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_staff or getattr(request.user, 'is_partner', False):
+            return self.list(request, *args, **kwargs)
+        return Response(
+            {"detail": "Not authorized."},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        event_id = instance.event.id if instance.event else None
+        if event_id:
+            cache.delete(f"event_report_{event_id}")  # invalidate cache on new entry
+        return instance
+
+
+
+'''
+class EventReportById(mixins.ListModelMixin,
+                      mixins.CreateModelMixin,
+                      generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+    serializer_class = EventReportSerializer
+
+    def get_queryset(self):
+        event_id = self.kwargs.get('pk')
+        cache_key = f"event_report_{event_id}"
+
+        # Try cached version
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            print("💾 Returning cached queryset")
+            return cached_data
+
+        # Get from DB (optimize only with select_related)
+        queryset = (
+            EventReport.objects
+            .filter(event__id=event_id)
+            .select_related('event')  # Only if 'event' is a FK
+        )
+
+        # Evaluate queryset (important: force query)
+        data = list(queryset)
+        cache.set(cache_key, data, timeout=120)  # 2 minutes
+
+        return data
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_staff or getattr(request.user, 'is_partner', False):
+            return self.list(request, *args, **kwargs)
+        return Response(
+            {"detail": "Not authorized."},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        event_id = instance.event.id if instance.event else None
+        if event_id:
+            cache.delete(f"event_report_{event_id}")  # invalidate cache
+        return instance
+    
+
+class EventReportById(mixins.ListModelMixin,
+                mixins.CreateModelMixin,
+                generics.GenericAPIView):
+    
+    permission_classes = [permissions.IsAuthenticated,]
+    authentication_classes = (TokenAuthentication,)
+
+    serializer_class = EventReportSerializer
+    
+    def get_queryset(self):
+        print('request event_id: ', self.request)
+        print('self.kwargs', self.kwargs['pk'])
+        event_id = self.kwargs.get('pk')
+        queryset = EventReport.objects.filter(
+            event__id=event_id)
+        print('queryset in get_queryset', queryset)
+        return queryset
+    
+    def get(self, request, *args, **kwargs):
+        if request.user.is_staff or getattr(request.user, 'is_partner', False):
+            return self.list(request, *args, **kwargs)
+        else:
+            return Response(
+                {"detail": "Not authorized."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+'''  
+
 ####################'''TODO'''##############################################
 class EventReportListLimited(mixins.ListModelMixin,
                 mixins.CreateModelMixin,
@@ -1155,10 +1282,9 @@ class EventReportListLimited(mixins.ListModelMixin,
     authentication_classes = (TokenAuthentication,)
 #############
     def get_queryset(self):
+
         user_email = self.request.META.get('HTTP_CURRENTUSER')
-        #print('self request at EventListLimited',self.request.META)
         kollege_with_email = (Kollege.objects.filter(email=user_email))
-        #print('qsKol', qsKol)
         if (kollege_with_email):
             queryset = EventReport.objects.filter(kollege_id=kollege_with_email[0]).filter(
                 event__start__gte=datetime.today()-timedelta(days=5),

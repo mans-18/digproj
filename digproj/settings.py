@@ -20,6 +20,14 @@ from corsheaders.defaults import default_headers
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
+    }
+}
+
 # Chat End-To-End Temp Storage.doc
 
 MEDIA_URL = '/media/'
@@ -98,7 +106,7 @@ TEMPLATES = [
 DEFAULT_AUTO_FIELD='django.db.models.AutoField' 
 
 WSGI_APPLICATION = 'digproj.wsgi.application'
-
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -110,7 +118,7 @@ DATABASES = {
         'CONN_MAX_AGE': 600,
     }
 }
-
+'''
 ############## For local DB, localhost ###########
 DATABASES = {
     'default': {

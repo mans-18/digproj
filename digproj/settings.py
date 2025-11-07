@@ -106,7 +106,7 @@ TEMPLATES = [
 DEFAULT_AUTO_FIELD='django.db.models.AutoField' 
 
 WSGI_APPLICATION = 'digproj.wsgi.application'
-'''
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -118,8 +118,9 @@ DATABASES = {
         'CONN_MAX_AGE': 600,
     }
 }
-'''
+
 ############## For local DB, localhost ###########
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -130,6 +131,7 @@ DATABASES = {
         'PORT': '5432',
      }
 }
+
 ##################################################
 
 #SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"

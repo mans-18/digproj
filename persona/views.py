@@ -4,6 +4,8 @@ import threading
 import uuid
 import boto3
 import datetime, json
+import logging
+from botocore.exceptions import ClientError, ParamValidationError
 #from datetime import datetime, timedelta
 from rest_framework import generics, status, permissions, mixins, filters
 from rest_framework.views import APIView
@@ -42,7 +44,7 @@ from persona.serializers import (UserSerializer,
 from persona.utils.report_pdf import build_pdf_for_eventreport, sign_pdf_bytes_if_configured
 from persona.permissions import IsSuperOrReadOnly
 
-
+"""
 s3 = boto3.client('s3')
 
 def generate_signed_url(file_field, expires_in=3600):
@@ -54,6 +56,37 @@ def generate_signed_url(file_field, expires_in=3600):
         },
         ExpiresIn=expires_in
     )
+"""
+
+logger = logging.getLogger(__name__)
+
+s3 = boto3.client('s3')
+
+def generate_signed_url(file_field, expires_in=7257600):
+    """
+    Safely generate a presigned URL for an S3 file. 
+    Returns None if the key is missing, invalid, or AWS rejects the request.
+    """
+    try:
+        key = getattr(file_field, "name", None)
+        if not key or not key.strip():
+            logger.warning("Skipping presigned URL: empty or invalid S3 key")
+            return None
+
+        url = s3.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
+                "Key": key
+            },
+            ExpiresIn=expires_in
+        )
+        return url
+
+    except (ClientError, ParamValidationError) as e:
+        logger.error(f"Presigned URL error for key '{key}': {e}")
+        return None
+
 
 
 class EventReportGeneratePDF(APIView):
@@ -167,16 +200,17 @@ class CaptureImageView(APIView):
             temp_img.image_file.save(filename, image_file, save=False)
 
             # Save locally too (optional)
+            
             local_folder = getattr(settings, "TEMP_IMAGE_LOCAL_PATH", "/tmp/temp_images/")
             os.makedirs(local_folder, exist_ok=True)
             local_path = os.path.join(local_folder, filename)
             with open(local_path, "wb") as f:
                 for chunk in image_file.chunks():
                     f.write(chunk)
-
+            
             temp_img.local_path = local_path
             temp_img.save()
-
+            
             serializer = TemporaryImageSerializer(temp_img, context={"request": request})
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -254,7 +288,143 @@ class DeleteAllTempImage(APIView):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+""""
+""" """ Did not solve duplication """ """
+from django.core.files.base import ContentFile
+from django.db.models import Q
 
+class SaveSelectedImages(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = (TokenAuthentication,)
+
+    def post(self, request, event_id):
+        image_ids = request.data.get("image_ids", [])
+        image_caption = request.data.get("caption", "")
+        image_comment = request.data.get("comment", "")
+        event = get_object_or_404(Event, pk=event_id)
+
+        saved = []
+        temps = TemporaryImage.objects.filter(id__in=image_ids)
+
+        s3_uploaded_keys = set()
+
+        for t in temps:
+            filename = os.path.basename(t.image_file.name)
+            s3_key = f"events/{event_id}/{filename}"
+
+            # Avoid duplicates
+            if EventReportImage.objects.filter(
+                Q(event=event) & Q(image_file=s3_key)
+            ).exists():
+                print(f"Skipping duplicate S3 key: {s3_key}")
+                continue
+
+            # Create the DB record first
+            event_img = EventReportImage(
+                event=event,
+                caption=image_caption or t.caption or "",
+                comment=image_comment or t.comment or "",
+                local_path=None,  # not needed now
+            )
+
+            # Upload directly to S3 using ContentFile
+            file_bytes = t.image_file.read()
+            event_img.image_file.save(s3_key, ContentFile(file_bytes), save=True)
+
+            saved.append({
+                "id": event_img.id,
+                "s3_key": event_img.image_file.name,
+            })
+
+            # Delete local temp file and row
+            try:
+                t.image_file.delete(save=False)
+            except Exception:
+                pass
+            t.delete()
+
+        return Response({"saved": saved}, status=status.HTTP_201_CREATED)
+"""
+
+
+from django.shortcuts import get_object_or_404
+from django.core.files.base import ContentFile
+from rest_framework import generics, permissions, status
+from rest_framework.response import Response
+from rest_framework.authentication import TokenAuthentication
+from core.models import Event, TemporaryImage, EventReportImage
+import os
+
+class SaveSelectedImages(generics.GenericAPIView):
+    """
+    POST /api/events/<event_id>/save-images/
+    payload example 1 (current):
+        {"image_ids": [1, 2, 3], "caption": "text", "comment": "text"}
+
+    payload example 2 (optional future):
+        {"images": [{"id": 1, "caption": "x"}, {"id": 2, "caption": "y"}]}
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = (TokenAuthentication,)
+
+    def post(self, request, event_id):
+        event = get_object_or_404(Event, pk=event_id)
+
+        image_ids = request.data.get("image_ids", [])
+        caption = request.data.get("caption", "")
+        comment = request.data.get("comment", "")
+        images_data = request.data.get("images", None)  # optional future support
+        report_id = request.data.get("report_id", None)
+
+        saved = []
+        if not image_ids and not images_data:
+            return Response({"error": "No image IDs provided"}, status=400)
+
+        # if per-image data is provided (future-proof)
+        if images_data:
+            temps = TemporaryImage.objects.filter(id__in=[i["id"] for i in images_data])
+            caption_map = {i["id"]: i.get("caption", "") for i in images_data}
+            comment_map = {i["id"]: i.get("comment", "") for i in images_data}
+        else:
+            temps = TemporaryImage.objects.filter(id__in=image_ids)
+            caption_map = {t.id: caption for t in temps}
+            comment_map = {t.id: comment for t in temps}
+
+        for t in temps:
+            filename = os.path.basename(t.image_file.name)
+
+            # ✅ Skip duplicates (same file already linked to this event)
+            if EventReportImage.objects.filter(event=event, image_file__icontains=filename).exists():
+                continue
+
+            # Create target record
+            event_img = EventReportImage.objects.create(
+                event=event,
+                caption=caption_map.get(t.id, ""),
+                comment=comment_map.get(t.id, ""),
+                local_path=t.local_path
+            )
+
+            # Save actual file to S3
+            file_bytes = t.image_file.read()
+            s3_filename = f"events/{event_id}/{filename}"
+            event_img.image_file.save(s3_filename, ContentFile(file_bytes), save=True)
+
+            saved.append({
+                "event_image_id": event_img.id,
+                "s3_path": event_img.image_file.name,
+                "s3_url": None  # optional: add presigned URL
+            })
+
+            # Clean up temporary file and record
+            try:
+                t.image_file.delete(save=False)
+            except Exception:
+                pass
+            t.delete()
+
+        return Response({"saved": saved}, status=status.HTTP_201_CREATED)
+'''
 class SaveSelectedImages(mixins.ListModelMixin,
                         mixins.CreateModelMixin,
                         generics.GenericAPIView):
@@ -288,7 +458,13 @@ class SaveSelectedImages(mixins.ListModelMixin,
             # Bad previous code set caption=t.caption
             event_img = EventReportImage.objects.create(event=event, caption=image_caption or '', comment=image_comment or '', local_path=t.local_path)
             # read local file and save into the EventReportImage.image_file which uses S3
-
+            """
+            
+            '''''' ✅ Better: use Django’s built-in File object directly — no manual read into memory. You can stream from disk to S3:''''''
+            filename = f"events/{event_id}/{os.path.basename(t.image_file.name)}"
+            with t.image_file.open("rb") as f:
+                event_img.image_file.save(filename, f, save=True)
+            """
             ############# Saves to S3 without reopening the file as above ###########
             ############# Expensive for multi MB files 
             filename = f"events/{event_id}/{os.path.basename(t.image_file.name)}"
@@ -297,6 +473,7 @@ class SaveSelectedImages(mixins.ListModelMixin,
             # Wrap in ContentFile and save to S3
             event_img.image_file.save(filename, ContentFile(file_bytes), save=True)
             ################################################
+            
             saved.append({
                 "event_image_id": event_img.id,
                 "s3_path": event_img.image_file.name,
@@ -311,6 +488,9 @@ class SaveSelectedImages(mixins.ListModelMixin,
             t.delete()
 
         return Response({"saved": saved}, status=status.HTTP_201_CREATED)
+'''
+
+
 
     #########3 To  include caption and comment 11-10-25
 class EventReportImageDetail(mixins.RetrieveModelMixin,
